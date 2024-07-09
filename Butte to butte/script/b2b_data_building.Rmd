@@ -1,0 +1,182 @@
+---
+title: "B2B Data File creation"
+author: "Havisha Khurana"
+date: "2024-07-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# loading packages
+library(rvest) # for web scraping functions using css tags
+library(tidyverse) # for basic data wrangling
+library(polite) # for checking website permissions
+```
+
+The main results page on Butte to Butte website looks as this:
+
+
+There are hyperlinks embedded on the page for each race year which redirects to the annual results. First, I will extract all the year-result page links.
+
+```{r}
+# read the main results page on B2B
+# save url in string
+b2b_results_url <- "https://buttetobutte.com/results"
+
+# see rules for scraping on the page and other bots information
+results_session <- bow(b2b_results_url,
+                       user_agent = "HK result scraping",
+                       force = TRUE)
+
+results_session # we have the permission to scrape!
+```
+
+```{r}
+# get annual links in a tibble
+
+b2b_annual_results_links <- tibble(
+    year = scrape(results_session) %>%
+    # all year results in p - get those
+    html_element("p") %>%
+    # extracting hyperlinks from paragraph with each year has corresponding results
+    html_elements("a") %>% 
+    html_text(),
+    
+    link = scrape(results_session) %>%
+    # all year results in p - get those
+    html_element("p") %>%
+    # extracting hyperlinks from paragraph with each year has corresponding results
+    html_elements("a") %>% 
+    html_attr('href') 
+)
+
+```
+
+We extracted links for 23 years. Though the race is ongoing for 50 years, since 1974, digital results are only available for 23 years, starting 2000 (no results for 2001).
+
+```{r}
+table(gsub("(.*com)(.*)", "\\1",b2b_annual_results_links$link))
+```
+The links are present in three formats - starting with nebula, onlineraceresults, and eclectivedgeracing
+Nebula corresponds to pages with error - 4 years
+For the other years, one of the two different webpage designs were used. I will write functions to extract results from each of those.
+
+
+```{r}
+b2b_annual_results_links <- b2b_annual_results_links %>%
+    mutate(valid_link = ifelse(grepl("nebula", link), 0, 1),
+           html_design = ifelse(valid_link == 1, gsub("(.*com)(.*)", "\\1",link), NA),
+           html_design = factor(html_design, labels = c("orr", "eer")))
+
+table(b2b_annual_results_links$valid_link) # Valid link available for 19 years
+table(b2b_annual_results_links$html_design) # 
+```
+Elective Edge Racing (EER) style for 6 years (including 2024) and Online Race Results (ORR) for 13 years
+
+```{r}
+extract_table_eer <- function(link){
+
+  # check permissions
+    year_results_session <- bow(link,
+                       user_agent = "HK result scraping",
+                       force = TRUE)
+    
+  # extract hyperlinks specific to results
+    
+    year_format_links <- scrape(year_results_session) %>%
+    html_element(".nav-tabs") %>%
+    html_elements("li") %>%
+    html_elements("a") %>%
+    #html_text() 
+    html_attr("href") %>%
+    .[2]
+    
+}
+
+year_page1 <- read_html(year_results[2])
+a <- year_page1 %>%
+    html_element(".nav-tabs") %>%
+    html_elements("li") %>%
+    html_elements("a") %>%
+    #html_text() 
+    html_attr("href") %>%
+    .[2]
+
+race_codes <- read_html(a) %>%
+    html_element(".tabs") %>%
+    html_elements("p") %>%
+    html_attr("race-code")
+
+overall_race_links <- paste0(a,"/",race_codes)
+
+read_html(overall_race_links[3]) %>%
+    html_element("table") %>%
+    html_table()
+```
+
+```{r}
+extract_table_old
+```
+
+```{r}
+old_html_style <- read_html("https://onlineraceresults.com/race/view_race.php?race_id=57515")
+
+keep_links <- tibble(
+    description = old_html_style %>%
+    html_element("body") %>%
+    html_element("main") %>%
+    html_elements("a") %>%
+    html_text(),
+    links = old_html_style %>%
+    html_element("body") %>%
+    html_element("main") %>%
+    html_elements("a") %>%
+    html_attr('href'))
+
+a <- keep_links %>%
+  filter(grepl("Text", description)) %>%
+  mutate(links = paste0("https://onlineraceresults.com", links))
+    filter(grepl(".*Overall$", description))
+
+    html_elements(".column")
+    html_element("orr-event-races")
+    
+b <- read_html(a$links[1])  
+d <- b %>%
+  html_element("pre") %>%
+  html_text()
+
+d <- gsub("(.*)(Place)(.*)", "\\2\\3", d)
+d <- gsub("\r", "", d)
+d <- gsub("/", "_", d)
+str_count(d, "= ")
+comma_places <- str_split(d, "= ") %>% unlist()
+comma_places <- map_dbl(comma_places[1:11], ~str_count(.x, "=")+2)
+comma_places <- cumsum(comma_places)
+comma_places <- c(1, comma_places)
+rows <- str_split(d, "\n") %>% unlist()
+for(i in 2:12){
+  a <- substr(rows[[3]], comma_places[i-1], comma_places[i])
+  print(a)
+}
+substr(rows[[3]], 6, 23)
+read.table(text = d, sep = ",",header = TRUE)
+
+  html_elements("div") %>%
+  .[5] %>%
+  html_elements()
+    #html_element("orr-main-content")
+  html_children()
+  html_element("orr-main-content")
+c <- read_html("https://onlineraceresults.com/race/view_race.php?race_id=57515&relist_record_type=result&lower_bound=0&upper_bound=1835&use_previous_sql=1&group_by=default#results")
+
+c %>%
+  html_elements("form") %>%
+  .[5] %>%
+  html_children()
+    html_table()
+    d
+```
