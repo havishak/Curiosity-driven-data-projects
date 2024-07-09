@@ -1,6 +1,6 @@
 # Curiousity-driven Data Analysis and Coding Projects
 
-Welcome to my repository for curiosity-driven data analysis and coding projects. This collection includes various projects I have worked on/am working on out of curiosity and a passion for data science and coding. These projects are not related to my formal research but are valuable for exploring new techniques, tools, and datasets.
+Welcome to my repository for curiosity-driven data analysis and coding projects. This collection includes various projects I have worked on/am working on out of curiosity and a passion for data science and coding. 
 
 ## Table of Contents
 
@@ -17,12 +17,12 @@ This repository contains a variety of projects focused on data analysis and codi
 
 ## Projects
 
-1. **Project 1: Eugene Butte to Butte Race Results**
+1. **Project: Eugene Butte to Butte Race Results**
     - Description: Web-scrapping and Analysis of the Eugene Butte to Butte Race Results from 2000 to 2024
     - Tools: R, RStudio, tidyverse, rvest, polite.
-    - [Link to Project 1](./Butte to butte)
+    - [Link to Project 1](./butte_to_butte)
 
-2. **Project 2: Making reproducible CV**
+2. **Project: Making reproducible CV**
     - Description: Using R-interface to make a professional CV
     - Tools: R, RStudio, 
     - [Link to Project 2](./khurana_cv)
@@ -48,4 +48,4 @@ If you have any questions or suggestions, feel free to reach out to me:
 
 ---
 
-Thank you for visiting my repository! I hope you find these projects insightful and useful. Happy coding!
+Thank you for visiting my repository; Happy coding!
