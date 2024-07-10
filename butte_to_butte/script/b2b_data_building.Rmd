@@ -1,25 +1,38 @@
 ---
 title: "B2B Data File creation"
-author: "Havisha Khurana"
+author: "Havi"
 date: "2024-07-03"
-output: html_document
+output: 
+    html_document:
+        code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      error = FALSE)
 ```
+
+## Set-up
 
 ```{r}
 # loading packages
 library(rvest) # for web scraping functions using css tags
 library(tidyverse) # for basic data wrangling
 library(polite) # for checking website permissions
+library(janitor) # for clean column names
 ```
 
 The main results page on Butte to Butte website looks as this:
 
+```{r}
+knitr::include_graphics(here::here("images/b2b_results_page.png"))
+```
 
-There are hyperlinks embedded on the page for each race year which redirects to the annual results. First, I will extract all the year-result page links.
+There are hyperlinks embedded on the page for each race year which redirects to the annual race pages. First, I will extract all the year-event page links.
+
+## Scraping links to annual race pages
 
 ```{r}
 # read the main results page on B2B
@@ -37,7 +50,7 @@ results_session # we have the permission to scrape!
 ```{r}
 # get annual links in a tibble
 
-b2b_annual_results_links <- tibble(
+b2b_annual_race_links <- tibble(
     year = scrape(results_session) %>%
     # all year results in p - get those
     html_element("p") %>%
@@ -53,130 +66,200 @@ b2b_annual_results_links <- tibble(
     html_attr('href') 
 )
 
+# see data frame
+head(b2b_annual_race_links)
 ```
 
 We extracted links for 23 years. Though the race is ongoing for 50 years, since 1974, digital results are only available for 23 years, starting 2000 (no results for 2001).
 
 ```{r}
-table(gsub("(.*com)(.*)", "\\1",b2b_annual_results_links$link))
+# see links type 
+
+table(gsub("(.*com)(.*)", "\\1",b2b_annual_race_links$link))
 ```
+
 The links are present in three formats - starting with nebula, onlineraceresults, and eclectivedgeracing
 Nebula corresponds to pages with error - 4 years
 For the other years, one of the two different webpage designs were used. I will write functions to extract results from each of those.
 
 
 ```{r}
-b2b_annual_results_links <- b2b_annual_results_links %>%
+b2b_annual_race_links <- b2b_annual_race_links %>%
     mutate(valid_link = ifelse(grepl("nebula", link), 0, 1),
            html_design = ifelse(valid_link == 1, gsub("(.*com)(.*)", "\\1",link), NA),
-           html_design = factor(html_design, labels = c("orr", "eer")))
+           html_design = factor(html_design, labels = c("orr", "eer")),
+           year = parse_number(year))
 
-table(b2b_annual_results_links$valid_link) # Valid link available for 19 years
-table(b2b_annual_results_links$html_design) # 
+table(b2b_annual_race_links$valid_link) # Valid link available for 19 years
+table(b2b_annual_race_links$html_design) # types of html design used
 ```
-Elective Edge Racing (EER) style for 6 years (including 2024) and Online Race Results (ORR) for 13 years
+
+Elective Edge Racing (EER) style for 6 years (including 2024) and Online Race Results (ORR) for 13 years. In the 13 years that ORR was used, there were three different styles to organize the webpage. For 2015-2017, the results are available in text format. For prior years, the results aren't in a text format but instead a scrolable table that uses Javascript. I'm stuck at how to parse the information from Javascript so I'll only do it for 2015-2024.  
 
 ```{r}
-extract_table_eer <- function(link){
+b2b_annual_race_links <- b2b_annual_race_links %>%
+    filter(valid_link == 1, year > 2014)
+```
+
+## Scraping results from pages made using EER style
+
+```{r}
+extract_table_eer <- function(link, year){
 
   # check permissions
-    year_results_session <- bow(link,
+    year_page_session <- bow(link,
                        user_agent = "HK result scraping",
                        force = TRUE)
     
-  # extract hyperlinks specific to results
+  # extract hyperlinks specific to results page - second on the each year's tab
+    year_results_link <- scrape(year_page_session) %>%
+                            html_element(".nav-tabs") %>%
+                            html_elements("li") %>%
+                            html_elements("a") %>%
+                            #html_text() 
+                            html_attr("href") %>%
+                            .[2]
     
-    year_format_links <- scrape(year_results_session) %>%
-    html_element(".nav-tabs") %>%
-    html_elements("li") %>%
-    html_elements("a") %>%
-    #html_text() 
-    html_attr("href") %>%
-    .[2]
+  # extract overall-results links for each format type
     
+    year_results_session <- year_page_session %>%
+        nod(path = year_results_link)
+    
+    race_codes <- tibble(
+        race_format =  scrape(year_results_session) %>%
+                                     html_element(".tabs") %>%
+                                     html_elements("p") %>%
+                                     html_text(),
+        race_link_code = scrape(year_results_session) %>%
+                           html_element(".tabs") %>%
+                           html_elements("p") %>%
+                           html_attr("race-code"),
+        race_links = paste0(year_results_link,"/",race_link_code))
+    
+    results_data <- map2_df(race_codes$race_format, race_codes$race_links,
+                            ~year_results_session %>%
+                                nod(path = .y) %>%
+                                scrape(.) %>%
+                                html_element("table") %>%
+                                html_table() %>%
+                                clean_names() %>%
+                                # removing PII information
+                                select(-c(x, name, bib, age)) %>%
+                                mutate(
+                                    race_format = .x,
+                                    race_year = year
+                                ))
+    
+    return(results_data)
 }
 
-year_page1 <- read_html(year_results[2])
-a <- year_page1 %>%
-    html_element(".nav-tabs") %>%
-    html_elements("li") %>%
-    html_elements("a") %>%
-    #html_text() 
-    html_attr("href") %>%
-    .[2]
-
-race_codes <- read_html(a) %>%
-    html_element(".tabs") %>%
-    html_elements("p") %>%
-    html_attr("race-code")
-
-overall_race_links <- paste0(a,"/",race_codes)
-
-read_html(overall_race_links[3]) %>%
-    html_element("table") %>%
-    html_table()
 ```
 
-```{r}
-extract_table_old
-```
+## Scraping results from pages made using ORR style
 
 ```{r}
-old_html_style <- read_html("https://onlineraceresults.com/race/view_race.php?race_id=57515")
+extract_table_orr <- function(link, year){
 
-keep_links <- tibble(
-    description = old_html_style %>%
-    html_element("body") %>%
-    html_element("main") %>%
-    html_elements("a") %>%
-    html_text(),
-    links = old_html_style %>%
-    html_element("body") %>%
-    html_element("main") %>%
-    html_elements("a") %>%
-    html_attr('href'))
-
-a <- keep_links %>%
-  filter(grepl("Text", description)) %>%
-  mutate(links = paste0("https://onlineraceresults.com", links))
-    filter(grepl(".*Overall$", description))
-
-    html_elements(".column")
-    html_element("orr-event-races")
+  # check permissions
+    year_page_session <- bow(link,
+                       user_agent = "HK result scraping",
+                       force = TRUE)
     
-b <- read_html(a$links[1])  
-d <- b %>%
-  html_element("pre") %>%
-  html_text()
+  # extract hyperlinks specific to results page - ending with Overall - Text Results
+    year_event_results_links <- tibble(
+                description = scrape(year_page_session) %>%
+                                html_element("body") %>%
+                                html_element("main") %>%
+                                html_elements("a") %>%
+                                html_text(),
+                links =  scrape(year_page_session) %>%
+                        html_element("body") %>%
+                        html_element("main") %>%
+                        html_elements("a") %>%
+                        html_attr('href')) %>%
+          filter(grepl("Text", description)) %>%
+          # links have relative path - adding the first part for full address
+          mutate(links = paste0("https://onlineraceresults.com", links))
+        
+    
+  # extract text files from each event-format page
+    
+    format_results_text_files <- map(year_event_results_links$links,
+                                     ~ year_page_session %>%
+                                         nod(path = .x) %>%
+                                         scrape(.) %>%
+                                         html_element("pre") %>%
+                                         html_text() %>%
+                                         gsub("(.*)(Place )(.*)", "\\2\\3", .) %>%
+                                         gsub("\r", "", .) %>%
+                                         gsub("/", "_", .) %>%
+                                         str_split(., "\n") %>% 
+                                         unlist()
+    )
+                                                                                 
+  # convert text file to dataframe
 
-d <- gsub("(.*)(Place)(.*)", "\\2\\3", d)
-d <- gsub("\r", "", d)
-d <- gsub("/", "_", d)
-str_count(d, "= ")
-comma_places <- str_split(d, "= ") %>% unlist()
-comma_places <- map_dbl(comma_places[1:11], ~str_count(.x, "=")+2)
-comma_places <- cumsum(comma_places)
-comma_places <- c(1, comma_places)
-rows <- str_split(d, "\n") %>% unlist()
-for(i in 2:12){
-  a <- substr(rows[[3]], comma_places[i-1], comma_places[i])
-  print(a)
+  # initialize event_data inputs
+    results_data <- vector(mode = "list", length = length(format_results_text_files))
+    
+    for(i in seq_along(format_results_text_files)){
+    # count columns width in the dataframe using "=" signs
+        
+    column_size <- str_split(format_results_text_files[[i]][2], "= ") %>% 
+        unlist() 
+    column_size <- map_dbl(column_size[1:(length(column_size)-1)],
+                           ~str_count(.x,"=")+2)
+    column_size <- cumsum(column_size)
+    column_size <- c(1, column_size)
+    
+    # store column names
+    column_names <- vector(mode = "character", length = length(column_size) - 1)
+    
+    for (j in 2:length(column_size)){
+        column_names[j - 1] <- substr(format_results_text_files[[i]][1],
+                                      column_size[j-1], column_size[j]) %>%
+        gsub(" ","",.)
+    }
+
+    # make a dataframe to store each row's values
+    results_data[[i]] <- tibble(
+                    column_names,
+                    dummy_val = 1
+                ) %>%
+                    pivot_wider(
+                        names_from = column_names,
+                        values_from = dummy_val
+                    )
+
+    # initialize row inputs
+    row_value <- vector(mode = "character", length = length(column_size) - 1)
+    
+    for(j in 3:length(format_results_text_files[[i]])){
+        
+    row_value <- map_chr(2:length(column_size), ~substr(format_results_text_files[[i]][j], column_size[.x-1], column_size[.x]) %>%
+        gsub(" ","",.))
+    
+    results_data[[i]] <- rbind(results_data[[i]], row_value)}
 }
-substr(rows[[3]], 6, 23)
-read.table(text = d, sep = ",",header = TRUE)
+  
+    # add event detail and year to each data file
+    # then reduce to a single data frame
+    
+    results_data <- map2(results_data, 
+                         year_event_results_links$description, ~.x %>%
+                          mutate(race_format = gsub("(.*)( Overall - Text Format)", "\\1", .y),
+                       race_year = year) %>%
+                    clean_names() %>%
+        filter(place!= "", pame != "1")) %>%
+        reduce(., bind_rows)
+    
+    return(results_data)
+}
+```
 
-  html_elements("div") %>%
-  .[5] %>%
-  html_elements()
-    #html_element("orr-main-content")
-  html_children()
-  html_element("orr-main-content")
-c <- read_html("https://onlineraceresults.com/race/view_race.php?race_id=57515&relist_record_type=result&lower_bound=0&upper_bound=1835&use_previous_sql=1&group_by=default#results")
 
-c %>%
-  html_elements("form") %>%
-  .[5] %>%
-  html_children()
-    html_table()
-    d
+```{r}
+# trial
+a <- extract_table_eer(b2b_annual_race_links$link[2], b2b_annual_race_links$year[2])
+c <- extract_table_orr(b2b_annual_race_links$link[9], b2b_annual_race_links$year[9])
 ```
