@@ -1,68 +1,88 @@
 # Eugene [Butte to Butte](https://buttetobutte.com/) Results Data
 
-**Motivation:** I am in Eugene, OR, and there is massive running and track culture in the town. Each year on July 4th the butte (Spencer Butte) to butte (Skinner butte) happens and this year, my husbannd and I decied to participate. As I was registering us, i realized there is a challenge open - to answer in which year did participants from all 50 states participate in the race. I also realized there is a results page on the website that archives all past year results (going back to 2000) though the race started in 1974. I decided this might be a good opportunitiy to sharper my web-scrapping skills to answer this question. So, here's the context of the project.  
-
-**Approach:** In this project, I scraped the results of the Eugene Butte to Butte race, which takes place on every 4th of July in Eugene Oregon, to create a dataset which has participant-level (de-identified) information for all years for which results are public. Then, I used the resulting dataset to find which  year had participants. beyond answering this question, the dataset can be used to answer other race-related questions though I didn't spend much time diving into it.
-
-# Eugene [Butte to Butte](https://buttetobutte.com/) Results Data
-
 ## Motivation
 
-I am in Eugene, OR, and there is a massive running and track culture in the town. Each year on July 4th, the Butte (Spencer Butte) to Butte (Skinner Butte) race happens. This year, my husband and I decided to participate. As I was registering us, I realized there is a challenge open - to determine in which year participants from all 50 states participated in the race. I also discovered a results page on the website that archives all past year results (going back to 2000), even though the race started in 1974. I decided this might be a good opportunity to sharpen my web-scraping skills to answer this question. So, here's the context of the project.
+Living in Eugene, OR, I'm exposed to the vibrant running and track culture in the town. One annual racing event is the Butte to Butte run, which takes place July 4th eachyear. The two buttes refer to [Spencer Butte](https://en.wikipedia.org/wiki/Spencer_Butte) and [Skinner butte](https://en.wikipedia.org/wiki/Skinner_Butte). My husband and I decided to participate this year. As I was registering, I stumbled upon a trivia challenge: **in which year (and there's only one) did runners from all 50 states participated in the race?**. Since the race results for each year are available online (dating back 2000 though the race started in 1974), I decided to answer this question using my coding and data analytics skills.  
 
 ## Approach
 
-In this project, I scraped the results of the Eugene Butte to Butte race, which takes place every 4th of July in Eugene, Oregon, to create a dataset with participant-level (de-identified) information for all years for which results are public. Then, I used the resulting dataset to find the year in which participants from all 50 states took part. Beyond answering this question, the dataset can be used to answer other race-related questions, though I didn't spend much time diving into it.
+In this project, I scraped the results of the Eugene Butte to Butte race, which takes place on every 4th of July in Eugene Oregon, to create a dataset which has participant-level (de-identified) information for all years for which results are public. Then, I used the resulting dataset to find which  year had participants. beyond answering this question, the dataset can be used to answer other race-related questions though I didn't spend much time diving into it.
 
 ## Table of Contents
 
+- [Acknowledgments](#acknowledgments)
+- [Repository Structure](#repository-structure)
 - [Installation](#installation)
-- [Usage](#usage)
 - [Data Structure](#data-structure)
 - [Results](#results)
-- [Contributing](#contributing)
+- [Further Improvement](#further-improvement)
 - [License](#license)
-- [Acknowledgements](#acknowledgements)
+
+
+## Acknowledgments
+
+I heavily relied on the following resources:
+
+- `rvest` [reference page](https://rvest.tidyverse.org/) by [Hadley Wickham](https://hadley.nz/) 
+- SelectorGadget [tool](https://selectorgadget.com/) by [Andrew Cantino](https://github.com/cantino)
+- The Rvest & RSelenium [tutorial video](https://www.youtube.com/watch?v=Dkm1d4uMp34) by [Sameer Hijjazi](https://www.youtube.com/@SamerHijjazi)
+
+*Some more thanks:*
+
+- I leaned heavily on StackOverflow and Copilot for troubleshooting, especially when it came to starting a browser with RSelenium and nailing down the webdriver requirements.
+- Shoutout to the folks who sparked my interest in web scraping with their applications in classes: [Daniel Anderson](https://github.com/datalorax) and [Owen Jetton](https://cas.uoregon.edu/directory/social-sciences/all/ojetton)
+- Finally, thanks and love to my husband, [Piyush Amitabh](https://github.com/pamitabh). He not only mentioned the race to me but also encouraged and brainstormed with me throughout, patiently listening to my endless rants.
+
+## Repository Structure
+
+- **data/**: Contains the scraped dataset in CSV format.
+- **scripts/**: Includes RMD walkthrough used for web scraping and data processing as well as analysis
+
 
 ## Installation
 
-To run this project, you will need to have Python installed on your machine. You can install the necessary packages using pip:
+To run this project, you will need to have R installed on your machine. I used the following packages: 
 
-```bash
-pip install -r requirements.txt
+- Web-scraping: `rvest` and `RSelenium`
+- Scraping supporting: `polite`, `netstat`, `binman`, `wdman`
+- Data-wrangling: `tidyverse`, `janitor`
 
-## Table of Contents
+## Data Structure
 
-- [Overview](#overview)
-- [Projects](#projects)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+The resulting data has runner-year-level information for all event formats (10K run, 5K run, 4M walk, 4.5M walk) that took place in given years for thw following years: 2000, 2002-2006, 2009, 2012-2024. No race happened in 2001 and result pages for 2006, 2007, 2010, and 2011 doesn't exist. There are 62,575 rows in total.
 
-## Overview
+The variables are as follows:
+- place: int - Place of finish
+- sex: chr 
+- div: chr - Division in which runner participated (by gender and age-group)
+- city: chr - Registered city based on address shared at the time of registering
+- state: chr - Registered city based on address shared at the time of registering
+- gun_time: chr - Time in min:sec from when the clock started
+- net_time: chr - Time in min:sec from when the runner crossed the starting line (only available for later years)
+- pace: chr - Runner pace
+- sex_place: int - Place of finish in the same sex group
+- sex_total: int - Total runners in the same sex group
+- div_place: int - Place of finish in the same sex group
+- div_total: int - Total runners in the same sex group
+- age_graded_score: num - Ratio of a world-class time for a runner's age and gender divided by the runner's actual time (only available for later years)
+- start: chr - Time when runner crossed the line in hh:min:sec
+- race_format: chr - Race format, one of 10K, 5K, 4M Walk, 4.5M Walk
+- race_year: num - Race year
 
-This repository contains a variety of projects focused on data analysis and coding. Each project is self-contained with its own data, scripts, and README.md file.
+race_year, race_format, place can be used to identify each individual runner.
 
-## Projects
+## Results
 
-1. **Project: Eugene Butte to Butte Race Results**
-    - Description: Web-scrapping and Analysis of the Eugene Butte to Butte Race Results from 2000 to 2024
-    - Tools: R, RStudio, tidyverse, rvest, polite.
-    - [Link to Project 1](./butte_to_butte)
+And the answer was **2016**. I ended up winning a free registration for the event.
 
-2. **Project: Making reproducible CV**
-    - Description: Using R-interface to make a professional CV
-    - Tools: R, RStudio, 
-    - [Link to Project 2](./khurana_cv)
+![Trivia screenshot](images/winning_screenshot.jpg)
 
-## Usage
+We had a fun time at the race - did the 4M walk!!
 
-Each project has its own directory with detailed instructions on how to run the code and analyze the results. Please refer to the README file within each project directory for specific usage details.
+## Future Improvements
 
-## Contributing
-
-I welcome comments and suggestions for this repository. If you have feedback, please feel free to open an issue or leave a comment on the relevant project. For major changes or if you'd like to contribute code, please fork the repository and submit a pull request. 
+- Upon reviewing the scraped data, I noticed that the state information was only available from 2014 onwards, missing from earlier years. Although I could answer the initial question with the existing data, I plan to find another way to obtain the state information in the future.
+- Explore trends and uncover other interesting insights from the data
 
 ## License
 
@@ -75,6 +95,3 @@ If you have any questions or suggestions, feel free to reach out to me:
 - Email: havishak8@gmail.com
 - LinkedIn: [Havisha Khurana](linkedin.com/in/havisha-khurana/)
 
----
-
-Thank you for visiting my repository; Happy coding!
