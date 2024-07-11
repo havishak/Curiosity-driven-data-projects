@@ -7,8 +7,9 @@ output:
         code_folding: hide
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 knitr::opts_chunk$set(echo = TRUE,
+                      eval = FALSE,# I already ran and saved the data in data folder
                       warning = FALSE,
                       message = FALSE,
                       error = FALSE)
@@ -22,6 +23,8 @@ library(rvest) # for web scraping functions using css tags
 library(tidyverse) # for basic data wrangling
 library(polite) # for checking website permissions
 library(janitor) # for clean column names
+library(RSelenium) # for scraping dynamic tables 
+library(netstat) # to find free port
 ```
 
 The main results page on Butte to Butte website looks as this:
@@ -79,7 +82,9 @@ table(gsub("(.*com)(.*)", "\\1",b2b_annual_race_links$link))
 ```
 
 The links are present in three formats - starting with nebula, onlineraceresults, and eclectivedgeracing
+
 Nebula corresponds to pages with error - 4 years
+
 For the other years, one of the two different webpage designs were used. I will write functions to extract results from each of those.
 
 
@@ -94,14 +99,18 @@ table(b2b_annual_race_links$valid_link) # Valid link available for 19 years
 table(b2b_annual_race_links$html_design) # types of html design used
 ```
 
-Elective Edge Racing (EER) style for 6 years (including 2024) and Online Race Results (ORR) for 13 years. In the 13 years that ORR was used, there were three different styles to organize the webpage. For 2015-2017, the results are available in text format. For prior years, the results aren't in a text format but instead a scrolable table that uses Javascript. I'm stuck at how to parse the information from Javascript so I'll only do it for 2015-2024.  
+Elective Edge Racing (EER) style for 6 years (including 2024) and Online Race Results (ORR) for 13 years. In the 13 years that ORR was used, there were three different styles to organize the webpage. For 2015-2017, the results are available in text format. For prior years, the results aren't in a text format but instead a scrollable table that uses Javascript. I'll divide the workflow in two parts - scraping static webpages and scraping dynamic pages (I can scrape all ORR results with dynamic scraping method but I already wrote the code to scrape the text formatted table, so I'm playing along).
+
 
 ```{r}
-b2b_annual_race_links <- b2b_annual_race_links %>%
+b2b_annual_race_links_static <- b2b_annual_race_links %>%
     filter(valid_link == 1, year > 2014)
+
+b2b_annual_race_links_dynamic <- b2b_annual_race_links %>%
+    filter(valid_link == 1, year < 2015)
 ```
 
-## Scraping results from pages made using EER style
+## Scraping static results from pages made using EER style
 
 ```{r}
 extract_table_eer <- function(link, year){
@@ -155,7 +164,16 @@ extract_table_eer <- function(link, year){
 
 ```
 
-## Scraping results from pages made using ORR style
+```{r}
+# scrape eer style pages
+eer_year_results <- b2b_annual_race_links_static %>%
+    filter(html_design == "eer") 
+
+eer_year_results <- map2_df(eer_year_results$link, eer_year_results$year, 
+                            ~extract_table_eer(.x, .y))
+```
+
+## Scraping static results from pages made using ORR style
 
 ```{r}
 extract_table_orr <- function(link, year){
@@ -250,7 +268,8 @@ extract_table_orr <- function(link, year){
                           mutate(race_format = gsub("(.*)( Overall - Text Format)", "\\1", .y),
                        race_year = year) %>%
                     clean_names() %>%
-        filter(place!= "", pame != "1")) %>%
+        filter(place!= "", name != "1") %>%
+        select(-c(name, ag, no))) %>%
         reduce(., bind_rows)
     
     return(results_data)
@@ -259,7 +278,179 @@ extract_table_orr <- function(link, year){
 
 
 ```{r}
-# trial
-a <- extract_table_eer(b2b_annual_race_links$link[2], b2b_annual_race_links$year[2])
-c <- extract_table_orr(b2b_annual_race_links$link[9], b2b_annual_race_links$year[9])
+# scrape orr style pages
+orr_year_results <- b2b_annual_race_links_static %>%
+    filter(html_design == "orr") 
+
+orr_year_results <- map2_df(orr_year_results$link, orr_year_results$year, 
+                            ~extract_table_orr(.x, .y))
 ```
+
+
+## Scraping dynamic pages
+
+
+```{r}
+# get result-links to loop through
+# within each link, the steps are to click see all results, see all rows, and scrape the webpage
+
+extract_hyperlinks <- function(link, year){
+
+  # check permissions
+    year_page_session <- bow(link,
+                       user_agent = "HK result scraping",
+                       force = TRUE)
+    
+  # extract hyperlinks specific to results page - ending with Overall - Text Results
+    year_event_results_links <- tibble(
+                description = scrape(year_page_session) %>%
+                                html_elements(xpath = '//*[(@id = "orr-event-races")]') %>%
+                                html_elements("a") %>%
+                                html_text(),
+                links =  scrape(year_page_session) %>%
+                        html_elements(xpath = '//*[(@id = "orr-event-races")]') %>%
+                        html_elements("a") %>%
+                        html_attr('href'),
+                nrow = length(description),
+                further_filter = ifelse(nrow > 2, 1, 0),
+                link_to_keep = ifelse(further_filter == 1 & grepl("Overall", description), 1, 0),
+                year = year
+                ) %>%
+          filter(further_filter == 0 | (further_filter == 1 & link_to_keep == 1)) %>%
+          # links have relative path - adding the first part for full address
+          mutate(links = paste0("https://onlineraceresults.com", links))
+    
+    return(year_event_results_links)
+}
+```
+
+```{r}
+dynamic_hyperlinks <- map2_df(b2b_annual_race_links_dynamic$link,
+                               b2b_annual_race_links_dynamic$year,
+                               ~extract_hyperlinks(.x, .y))
+```
+
+
+```{r}
+# set-up driver_object and start browser
+rs_driver_object <- rsDriver(
+    browser = "chrome",
+    chromever = "126.0.6478.126",
+    verbose = TRUE,
+    port = netstat::free_port() 
+)
+
+# set up the client side
+rs_driver_client <- rs_driver_object$client
+```
+
+Now, we will navigate to each website from out hyperlink page. Then, we will click show all results, show all rows, and scrape the page. We will 
+
+```{r}
+extract_table_orr_dynamic <- function(link, year, format){
+    # navigate to the page
+    rs_driver_client$navigate(link)
+    
+    # click show all results
+    show_all_results <- rs_driver_client$findElement(using = 'xpath', '//*[(@id = "orr-race-results-search")]//li[(((count(preceding-sibling::*) + 1) = 1) and parent::*)]//a')
+    
+    show_all_results$clickElement()
+    
+    # click show all rows
+    show_all_rows <- rs_driver_client$findElement(using = 'xpath', '//*[(@id = "orr-main-event-race-results")]//a[(((count(preceding-sibling::*) + 1) = 5) and parent::*)]')
+
+    show_all_rows$clickElement()
+    
+    # get page source and scrape page
+    table_location <- rs_driver_client$findElement(using = 'id',
+                                      'race-results-table')
+
+    table_html <- table_location$getPageSource()
+    
+    # extract table
+    table_df <-  read_html(table_html %>% unlist()) %>%
+                    # it's the third table
+                    html_table() 
+    
+    # it's either the third or the first. Earleir years have pages that only have one table
+    results_table_index <- ifelse(length(table_df) > 1, 3, 1)
+    
+    table_df <- table_df %>%
+                    .[[results_table_index]] %>%
+                    clean_names() %>%
+                    # drop PII and irrelevant cols
+                    select(-c(x, x_2, fn, ln, no)) %>%
+                    mutate(race_format = format,
+                           race_year = year)
+    
+    
+    return(table_df)
+}
+```
+
+```{r}
+# loop through hyperlinks and get the tables
+dynamic_table_results <- pmap(list(dynamic_hyperlinks$links,
+                                   dynamic_hyperlinks$year,
+                                   dynamic_hyperlinks$description),
+                              ~extract_table_orr_dynamic(..1, ..2, ..3))
+
+# close dynamic browser
+rs_driver_client$closeall()
+```
+
+```{r}
+dynamic_year_results <- reduce(dynamic_table_results, bind_rows)
+```
+
+## Join results of all formats
+
+
+```{r}
+# harmonizing column names
+str(eer_year_results)
+str(orr_year_results)
+str(dynamic_year_results)
+```
+Just realized there is no variable 'state' in the tables I scraped dynamically - which was kind of the whole point. For now, I'm harmonizing the files and might come back to the project to fix the state information.
+
+```{r}
+# changing colnames and col style to err_year_results style
+orr_year_results <- orr_year_results %>%
+    rename("sex" = "s",
+           "state" = "st",
+           "gun_time" = "time") %>% # assuming it will be the guntime since rfid wasn't too common a couple years ago
+    mutate(div_place = gsub("(\\d+)(_)(\\d+)", "\\1", div_tot),
+           div_total = gsub("(\\d+)(_)(\\d+)", "\\3", div_tot),
+           div = gsub("([A-Z]\\d{2})(\\d{2})", "\\1-\\2", div),
+           across(c(place, div_place, div_total), as.integer)
+           ) %>%
+    select(-div_tot)
+
+dynamic_year_results <- dynamic_year_results %>%
+    rename("place" = "overall",
+           "div"= "division",
+           "gun_time" = "time") %>% #same assumption
+    mutate(div_place = gsub("(\\d+)(/)(\\d+)", "\\1", divpl),
+           div_total = gsub("(\\d+)(/)(\\d+)", "\\3", divpl),
+           sex_place = gsub("(\\d+)(/)(\\d+)", "\\1", sexpl),
+           sex_total = gsub("(\\d+)(/)(\\d+)", "\\3", sexpl),
+           div = gsub("([A-Z]\\d{2})(\\d{2})", "\\1-\\2", div),
+           sex = gsub("([A-Z])(.*)", "\\1", div),
+           race_format = gsub(" Overall| Run| Mayor's", "", race_format),
+           across(c(place, div_place, div_total, sex_place, sex_total), as.integer)) %>%
+    select(-c(divpl, sexpl))
+```
+
+```{r}
+#changing race_format from 4 Mile Walk to 4M Walk in eer_year_results to be consistent
+eer_year_results <- eer_year_results %>%
+    mutate(race_format = gsub(" Mile","M", race_format))
+```
+
+```{r}
+#join
+all_year_results <- bind_rows(eer_year_results, orr_year_results, dynamic_year_results)
+write.csv(all_year_results, "data/butte_to_butte_results_2000_2024.csv")
+```
+
