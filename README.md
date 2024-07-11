@@ -19,7 +19,7 @@ This repository contains a variety of projects focused on data analysis and codi
 
 1. **Project: Eugene Butte to Butte Race Results**
     - Description: Web-scrapping and Analysis of the Eugene Butte to Butte Race Results from 2000 to 2024
-    - Tools: R, RStudio, tidyverse, rvest, polite.
+    - Tools: R, RStudio, tidyverse, rvest, polite, janitor, RSelenium, netsta, binman, wdman
     - [Link to Project 1](./butte_to_butte)
 
 2. **Project: Making reproducible CV**
