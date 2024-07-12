@@ -38,7 +38,7 @@ df %>%
         x = "Number of state codes",
         y = "",
         title = "State codes represented in Eugene Butte to Butte Race by Year",
-        subtitle = "Runners from 51 state codes finished the race in 2016, \nwhile runners from 43 state codes finished it in the latest addition.",
+        subtitle = "Runners from 51 state codes finished the race in 2016, \nwhile runners from 43 state codes finished it in the latest edition.",
         caption = "There are 64 unique state codes in the dataset"
     ) +
     theme_minimal()+

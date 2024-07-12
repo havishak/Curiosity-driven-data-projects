@@ -15,7 +15,7 @@ In this project, I scraped the results of the Eugene Butte to Butte race, which 
 - [Installation](#installation)
 - [Data Structure](#data-structure)
 - [Results](#results)
-- [Further Improvement](#further-improvement)
+- [Relfection](#reflection)
 - [License](#license)
 
 
@@ -45,7 +45,7 @@ To run this project, you will need to have R installed on your machine. I used t
 
 - Web-scraping: `rvest` and `RSelenium`
 - Scraping supporting: `polite`, `netstat`, `binman`, `wdman`
-- Data-wrangling: `tidyverse`, `janitor`
+- Data-wrangling: `tidyverse`, `janitor`, `here`
 
 ## Data Structure
 
@@ -83,7 +83,19 @@ Runners from 51 state codes finished the race in 2016, however, runners from all
 
 We had a fun time at the race - did the 4M walk!!
 
-## Future Improvements
+## Reflection 
+
+### Successes
+
+- Scraping tables in three different formats: static tables using `rvest`, static tables which are text but printed in a table format using `rvest`, and dynamic tables made using JavaScript using `RSelenium`
+- Pipeline to scrape 20 web pages which had 2-3 internal links to scrape
+
+### Frustrations
+
+- I had a hard time figuring out JavaScript table, but that turned into a learning opportunity
+- Realized that state codes were not present in the scraped data for 2014 and before
+
+### Further Improvement
 
 - Upon reviewing the scraped data, I noticed that the state information was only available from 2014 onwards, missing from earlier years. Although I could answer the initial question with the existing data, I plan to find another way to obtain the state information in the future.
 - Explore trends and uncover other interesting insights from the data
