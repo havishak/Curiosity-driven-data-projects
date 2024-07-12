@@ -1,7 +1,6 @@
 ---
 title: "B2B Data File creation"
 author: "Havi"
-date: "2024-07-03"
 output: 
     html_document:
         code_folding: hide

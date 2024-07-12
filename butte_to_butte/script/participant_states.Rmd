@@ -1,0 +1,78 @@
+---
+title: "Analysis"
+author: "Havi"
+output: 
+    html_document:
+        code_folding: hide
+        toc: true
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      error = FALSE)
+```
+
+## Read data and load libraries
+
+```{r}
+library(tidyverse)
+df <- read.csv(here::here("data/butte_to_butte_results_2000_2024.csv"))
+```
+
+## Make visuals 
+
+```{r}
+df %>%
+    filter(state != "", !is.na(state)) %>%
+    group_by(race_year) %>%
+    summarize(n_states = length(unique(state))) %>%
+    filter(n_states > 1) %>%
+    ggplot(aes(y = factor(race_year), x = n_states)) +
+    geom_col(fill = "gray60") +
+    geom_col(data = . %>% filter(n_states == max(n_states)), fill = "cornflowerblue") +
+    geom_text(aes(label = n_states), nudge_x = 1) +
+    labs(
+        x = "Number of state codes",
+        y = "",
+        title = "State codes represented in Eugene Butte to Butte Race by Year",
+        subtitle = "Runners from 51 state codes finished the race in 2016, \nwhile runners from 43 state codes finished it in the latest addition.",
+        caption = "There are 64 unique state codes in the dataset"
+    ) +
+    theme_minimal()+
+    theme(
+        axis.text.x = element_blank()
+    )
+```
+
+```{r}
+df %>%
+    filter(state != "", !is.na(state), state %in% state.abb) %>% #has one of 50 states
+    group_by(race_year) %>%
+    summarize(n_states = length(unique(state))) %>%
+    filter(n_states > 1) %>%
+    ggplot(aes(y = factor(race_year), x = n_states)) +
+    geom_col(fill = "gray60") +
+    geom_col(data = . %>% filter(n_states == max(n_states)), 
+             fill = "cornflowerblue") +
+    geom_text(aes(label = n_states), nudge_x = 1) +
+    labs(
+        x = "Number of US states",
+        y = "",
+        title = "State codes represented in Eugene Butte to Butte Race by Year",
+        subtitle = "Runners from 49 US states finished the race in 2016; no runner from ME (Maine)",
+        caption = "There are 64 unique state codes in the dataset"
+    ) +
+    theme_minimal()+
+    theme(
+        axis.text.x = element_blank()
+    )
+```
+
+## Resolution
+
+**No year with all US states?** It could be the case that runners from all 50 US states registered in 2016 but no one from Maine finished the race. Or, they declined to share their information on the results page. Or, it was indeed 49 states that were represented and no one really caught it. 
+
+
