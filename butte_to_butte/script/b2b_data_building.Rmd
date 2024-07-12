@@ -5,6 +5,8 @@ date: "2024-07-03"
 output: 
     html_document:
         code_folding: hide
+        toc: true
+        toc_float: true
 ---
 
 ```{r setup}
@@ -29,7 +31,7 @@ library(netstat) # to find free port
 
 The main results page on Butte to Butte website looks as this:
 
-```{r}
+```{r eval = TRUE}
 knitr::include_graphics(here::here("images/b2b_results_page.png"))
 ```
 
@@ -112,6 +114,13 @@ b2b_annual_race_links_dynamic <- b2b_annual_race_links %>%
 
 ## Scraping static results from pages made using EER style
 
+**Process:**
+
+```{r eval = TRUE}
+knitr::include_graphics(here::here("images/eer_table_extract.gif"))
+```
+
+
 ```{r}
 extract_table_eer <- function(link, year){
 
@@ -174,6 +183,13 @@ eer_year_results <- map2_df(eer_year_results$link, eer_year_results$year,
 ```
 
 ## Scraping static results from pages made using ORR style
+
+**Process:**
+
+```{r eval = TRUE}
+knitr::include_graphics(here::here("images/orr_text_table_extract.gif"))
+```
+
 
 ```{r}
 extract_table_orr <- function(link, year){
@@ -289,6 +305,12 @@ orr_year_results <- map2_df(orr_year_results$link, orr_year_results$year,
 
 ## Scraping dynamic pages
 
+**Process:**
+
+```{r eval = TRUE}
+knitr::include_graphics(here::here("images/dynamic_table_extract.gif"))
+```
+
 
 ```{r}
 # get result-links to loop through
@@ -329,7 +351,6 @@ dynamic_hyperlinks <- map2_df(b2b_annual_race_links_dynamic$link,
                                b2b_annual_race_links_dynamic$year,
                                ~extract_hyperlinks(.x, .y))
 ```
-
 
 ```{r}
 # set-up driver_object and start browser
@@ -394,12 +415,24 @@ dynamic_table_results <- pmap(list(dynamic_hyperlinks$links,
                                    dynamic_hyperlinks$year,
                                    dynamic_hyperlinks$description),
                               ~extract_table_orr_dynamic(..1, ..2, ..3))
+```
 
+
+**So satisfying when it magically works!**
+
+```{r eval = TRUE}
+knitr::include_graphics(here::here("images/dynamic_scraping.gif"))
+```
+
+
+```{r}
 # close dynamic browser
 rs_driver_client$closeall()
 ```
 
+
 ```{r}
+#collapse list elements into one dataframe
 dynamic_year_results <- reduce(dynamic_table_results, bind_rows)
 ```
 
