@@ -2,11 +2,11 @@
 
 ## Motivation
 
-Living in Eugene, OR, I'm exposed to the vibrant running and track culture in the town. One annual racing event is the Butte to Butte run, which takes place July 4th eachyear. The two buttes refer to [Spencer Butte](https://en.wikipedia.org/wiki/Spencer_Butte) and [Skinner butte](https://en.wikipedia.org/wiki/Skinner_Butte). My husband and I decided to participate this year. As I was registering, I stumbled upon a trivia challenge: **in which year (and there's only one) did runners from all 50 states participated in the race?**. Since the race results for each year are available online (dating back 2000 though the race started in 1974), I decided to answer this question using my coding and data analytics skills.  
+Living in Eugene, OR, I'm exposed to the vibrant running and track culture in the town. One annual racing event is the Butte to Butte run, which takes place around July 4th each year. The two buttes refer to [Spencer Butte](https://en.wikipedia.org/wiki/Spencer_Butte) and [Skinner Butte](https://en.wikipedia.org/wiki/Skinner_Butte). My husband and I decided to participate this year (2024). As I was registering, I stumbled upon a trivia challenge: **in which year (and there's only one) were runners from all 50 states represented in the race?**. Since the race results for each year are available online (dating back 2000 though the race started in 1974), I decided to answer this question using some web-scrapping.  
 
 ## Approach
 
-In this project, I scraped the results of the Eugene Butte to Butte race, which takes place on every 4th of July in Eugene Oregon, to create a dataset which has participant-level (de-identified) information for all years for which results are public. Then, I used the resulting dataset to find which  year had participants. beyond answering this question, the dataset can be used to answer other race-related questions though I didn't spend much time diving into it.
+In this project, I scraped the results of the Eugene Butte to Butte race to create a participant-level (de-identified) dataset for all years for which results are public. Then, I used the resulting dataset to find which year had participants from all states. Beyond answering this question, the dataset can be used to explore other race-related questions though I didn't spend much time diving into it.
 
 ## Table of Contents
 
@@ -30,13 +30,14 @@ I heavily relied on the following resources:
 *Some more thanks:*
 
 - I leaned heavily on StackOverflow and Copilot for troubleshooting, especially when it came to starting a browser with RSelenium and nailing down the webdriver requirements.
-- Shoutout to the folks who sparked my interest in web scraping with their applications in classes: [Daniel Anderson](https://github.com/datalorax) and [Owen Jetton](https://cas.uoregon.edu/directory/social-sciences/all/ojetton)
+- Shoutout to the folks who sparked my interest in web scraping with their mind-blowing examples in class: [Daniel Anderson](https://github.com/datalorax) and [Owen Jetton](https://github.com/ojetton)
 - Finally, thanks and love to my husband, [Piyush Amitabh](https://github.com/pamitabh). He not only mentioned the race to me but also encouraged and brainstormed with me throughout, patiently listening to my endless rants.
 
 ## Repository Structure
 
 - **data/**: Contains the scraped dataset in CSV format.
 - **scripts/**: Includes RMD walkthrough used for web scraping and data processing as well as analysis
+- **images/**: Includes images I used in the walkthrough and result plots
 
 
 ## Installation
@@ -77,27 +78,30 @@ race_year, race_format, place can be used to identify each individual runner.
 
 ![Fig2:](images/state_year.jpeg)
 
-Runners from 51 state codes finished the race in 2016, however, runners from all 50 states in mainland US either didn't finish the race or didn't release their information for public results page. Nevertheless, I answered **2016** and ended up winning a *free registration* for the event.
+Runners from 51 state codes finished the race in 2016, while runners from 49 states in mainland US finished the race in 2016. Though if we count DC, that totals to 50. The discrepancy could be either that someone from Maine registered but didn't finish the race or didn't release their information for public results page. Nevertheless, I answered **2016** and ended up winning a *free registration* for the event. Wohoo! 
 
 ![Trivia screenshot](images/winning_screenshot.jpg)
 
 We had a fun time at the race - did the 4M walk!!
+
+Edit: The mail from this year's race said 41 states were represented though I got 43 and 39 from my approach - there may also be a definition variation in what we are classifying as a state.  
 
 ## Reflection 
 
 ### Successes
 
 - Scraping tables in three different formats: static tables using `rvest`, static tables which are text but printed in a table format using `rvest`, and dynamic tables made using JavaScript using `RSelenium`
-- Pipeline to scrape 20 web pages which had 2-3 internal links to scrape
+- Pipeline to scrape 20 web pages which had 2-3 internal links
 
 ### Frustrations
 
 - I had a hard time figuring out JavaScript table, but that turned into a learning opportunity
 - Realized that state codes were not present in the scraped data for 2014 and before
+- There may be differences in what counts as a state
 
 ### Further Improvement
 
-- Upon reviewing the scraped data, I noticed that the state information was only available from 2014 onwards, missing from earlier years. Although I could answer the initial question with the existing data, I plan to find another way to obtain the state information in the future.
+- Upon reviewing the scraped data, I noticed that the state information was only available from 2015 onwards, missing from earlier years. Although I could answer the initial question with the existing data, I plan to find another way to obtain the state information in the future.
 - Explore trends and uncover other interesting insights from the data
 
 ## License
