@@ -73,7 +73,11 @@ race_year, race_format, place can be used to identify each individual runner.
 
 ## Results
 
-And the answer was **2016**. I ended up winning a free registration for the event.
+![Fig1:](images/b2b_state_codes_year.jpeg)
+
+![Fig2:](images/b2b_state_year.jpeg)
+
+Runners from 51 state codes finished the race in 2016, however, runners from all 50 states in mainland US either didn't finish the race or didn't release their information for public results page. Nevertheless, I answered **2016** and ended up winning a *free registration* for the event.
 
 ![Trivia screenshot](images/winning_screenshot.jpg)
 

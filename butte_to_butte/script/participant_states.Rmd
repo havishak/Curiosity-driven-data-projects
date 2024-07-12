@@ -61,7 +61,7 @@ df %>%
     labs(
         x = "Number of US states",
         y = "",
-        title = "State codes represented in Eugene Butte to Butte Race by Year",
+        title = "US States represented in Eugene Butte to Butte Race by Year",
         subtitle = "Runners from 49 US states finished the race in 2016; no runner from ME (Maine)",
         caption = "There are 64 unique state codes in the dataset"
     ) +
