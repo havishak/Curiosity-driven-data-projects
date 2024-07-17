@@ -27,6 +27,11 @@ This repository contains a variety of projects focused on data analysis and codi
     - Tools: R, RStudio, 
     - [Link to Project 2](./khurana_cv)
 
+3.  **Project: TidyTuesday Learning Challenge**
+    - Description: Exploring TidyTuesday Datasets 
+    - Tools: R, RStudio; other packages vary from week to week.
+    - [Link to Project 3](./tidytuesday)
+
 ## Usage
 
 Each project has its own directory with detailed instructions on how to run the code and analyze the results. Please refer to the README file within each project directory for specific usage details.

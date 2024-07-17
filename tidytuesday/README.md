@@ -1,5 +1,4 @@
-# (TidyTuesday)[https://github.com/rfordatascience/tidytuesday] Learning Community
-
+# [TidyTuesday](https://github.com/rfordatascience/tidytuesday) Learning Challenges
 ## Motivation
 
 Although I was aware of #TidyTuesday and #RStats, I hadn't tried my hand at them. This summer (July 2024), I decided to dive deeper and hone my visualization and data wrangling skills with new datasets. As a data enthusiast, I'm excited to share my journey through the weekly TidyTuesday learning challenges. This folder contains the datasets I've used, my analysis scripts, and visualizations created along the way. 
@@ -19,12 +18,12 @@ Each file has a date in its name for management purposes.
 
 ### July 16 (Week 29)
 
-**Data:** (The English Women's Football (EWF) Database)[https://github.com/probjects/ewf-database]
+**Data:** [The English Women's Football (EWF) Database](https://github.com/probjects/ewf-database)
 **Packages:** `tidyverse` and `gganimate`
 **Question:** How has the team ranking (teams with highest wins) evolve over time in the Women's Super League Tier 1?
 **Approach:** Created a racing bar chart to show team with most wins across seasons
 
-<img src="products/tt_july1624_racingbars.gif" width="500">
+<img src="products/tt_july1624_racingbars.gif" width="1000">
 
 **Interesting finding:** After 2018, a lot of teams changed their names going away from Ladies to Women. For example, Arsenal Ladies/Chelsea Ladies to Arsenal Women/Chelsea Women. That's why the abruptness of the bars seem to stand out.
 
