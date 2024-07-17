@@ -74,9 +74,9 @@ race_year, race_format, place can be used to identify each individual runner.
 
 ## Results
 
-![Fig1:](images/state_codes_year.jpeg)
+<img src = "images/state_codes_year.jpeg" width = 800>
 
-![Fig2:](images/state_year.jpeg)
+<img src = "images/state_year.jpeg" width = 800>
 
 Runners from 51 state codes finished the race in 2016, while runners from 49 states in mainland US finished the race in 2016. Though if we count DC, that totals to 50. The discrepancy could be either that someone from Maine registered but didn't finish the race or didn't release their information for public results page. Nevertheless, I answered **2016** and ended up winning a *free registration* for the event. Wohoo! 
 

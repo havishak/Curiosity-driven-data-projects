@@ -19,8 +19,11 @@ Each file has a date in its name for management purposes.
 ### July 16 (Week 29)
 
 **Data:** [The English Women's Football (EWF) Database](https://github.com/probjects/ewf-database)
+
 **Packages:** `tidyverse` and `gganimate`
+
 **Question:** How has the team ranking (teams with highest wins) evolve over time in the Women's Super League Tier 1?
+
 **Approach:** Created a racing bar chart to show team with most wins across seasons
 
 <img src="products/tt_july1624_racingbars.gif" width="1000">
