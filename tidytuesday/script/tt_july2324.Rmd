@@ -1,0 +1,106 @@
+---
+title: "tt_jul2324"
+author: "Havisha Khurana"
+date: "2024-07-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      error = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(ggimage)
+library(patchwork)
+```
+
+```{r}
+#read data
+songs <- readr::read_csv("https://raw.githubusercontent.com/kkakey/American_Idol/main/Songs/songs_all.csv")
+```
+
+Q. Which artist's songs were performed by the most contestants in each season of American Idol?
+
+
+```{r}
+top_artists <- songs %>% 
+    group_by(season, artist) %>%
+    summarize(artist_songs = n()) %>%
+    ungroup() %>%
+    group_by(season) %>%
+    mutate(total_songs = n()) %>%
+    top_n(1, artist_songs) %>%
+    mutate(artist_songs_pct = artist_songs/total_songs*100)
+```
+```{r}
+# Add images for each artist
+artist_images <- here::here(paste0("images/", list.files(here::here("images/"))))
+
+names(artist_images) <- sort(unique(top_artists$artist))
+
+artist_images
+```
+
+```{r}
+# Merge images into the data
+top_artists <- top_artists %>%
+  mutate(image = artist_images[artist],
+         season = gsub("_"," ", season),
+         season = gsub("0([1-9])","\\1", season))
+```
+
+Visualize as an infographics
+
+```{r}
+# Function to create individual plots
+create_artist_plot <- function(season, artist, percentage, image) {
+  plot <- ggplot() +
+    annotate("text", x = 1, y = 4.1, label = season, size = 4, fontface = "bold", color = "#0033A0") +
+    annotate("text", x = 1, y = 0.8, label = artist, size = 3, fontface = "italic", color = "#FF6F61") +
+    annotate("text", x = 1, y = 0.5, label = paste0(round(percentage, 1), "%"), size = 2, color = "#008080") +
+    geom_image(aes(x = 1, y = 2.45, image = image), size = 0.5) +
+    theme_void() +
+    theme(plot.margin = margin(0,0,0,0, "cm"),
+          plot.background = element_rect(fill = "#D3D3D3", color = NA))+
+     coord_fixed(ratio = 0.05)
+  
+  return(plot)
+}
+# Create a list of plots
+
+```
+
+
+```{r}
+plots <- map(1:nrow(top_artists), function(i) {
+  create_artist_plot(
+    top_artists$season[i],
+    top_artists$artist[i],
+    top_artists$artist_songs_pct[i],
+    top_artists$image[i]
+  )
+})
+```
+
+```{r}
+plots
+```
+
+
+```{r}
+# Arrange plots in a grid layout
+grid_plot <- wrap_plots(plots, ncol = 7, widths = 1) 
+grid_plot +
+    plot_annotation(title = "American Idol: Most Performed Artist",
+                    caption = "Data curated by github/kkakey") &
+    theme(plot.margin = margin(0.1, 0.1, 0.1, 0.1, "cm"),
+          plot.title = element_text(hjust = 0.5))
+```
+
+
+
+
