@@ -16,6 +16,14 @@ knitr::opts_chunk$set(echo = TRUE,
 library(tidyverse)
 library(ggimage)
 library(patchwork)
+library(showtext)
+```
+
+```{r}
+#load font
+# Add Google font and enable showtext
+font_add_google(name = "Lobster", family = "Lobster")
+showtext_auto()
 ```
 
 ```{r}
@@ -23,7 +31,10 @@ library(patchwork)
 songs <- readr::read_csv("https://raw.githubusercontent.com/kkakey/American_Idol/main/Songs/songs_all.csv")
 ```
 
-Q. Which artist's songs were performed by the most contestants in each season of American Idol?
+
+## Plot 1
+
+**Q. Which artist's songs were performed by the most contestants in each season of American Idol?**
 
 
 ```{r}
@@ -36,6 +47,8 @@ top_artists <- songs %>%
     top_n(1, artist_songs) %>%
     mutate(artist_songs_pct = artist_songs/total_songs*100)
 ```
+
+
 ```{r}
 # Add images for each artist
 artist_images <- here::here(paste0("images/", list.files(here::here("images/"))))
@@ -57,15 +70,15 @@ Visualize as an infographics
 
 ```{r}
 # Function to create individual plots
-create_artist_plot <- function(season, artist, percentage, image) {
+create_artist_plot <- function(season, artist, n_songs, image) {
   plot <- ggplot() +
-    annotate("text", x = 1, y = 4.1, label = season, size = 4, fontface = "bold", color = "#0033A0") +
-    annotate("text", x = 1, y = 0.8, label = artist, size = 3, fontface = "italic", color = "#FF6F61") +
-    annotate("text", x = 1, y = 0.5, label = paste0(round(percentage, 1), "%"), size = 2, color = "#008080") +
-    geom_image(aes(x = 1, y = 2.45, image = image), size = 0.5) +
+    annotate("text", x = 1, y = 4.1, label = season, size = 16, fontface = "bold", color = "#0033A0", family = "Lobster") +
+    annotate("text", x = 1, y = 0.8, label = artist, size = 14, fontface = "italic", color = "#FF6F61", family = "Lobster") +
+    annotate("text", x = 1, y = 0.5, label = paste0(n_songs, "x"), size = 13, color = "#008080", family = "Lobster") +
+    geom_image(aes(x = 1, y = 2.45, image = image), size = 0.7, by = "height") +
     theme_void() +
     theme(plot.margin = margin(0,0,0,0, "cm"),
-          plot.background = element_rect(fill = "#D3D3D3", color = NA))+
+          plot.background = element_rect(fill = "azure", color = NA))+
      coord_fixed(ratio = 0.05)
   
   return(plot)
@@ -80,27 +93,109 @@ plots <- map(1:nrow(top_artists), function(i) {
   create_artist_plot(
     top_artists$season[i],
     top_artists$artist[i],
-    top_artists$artist_songs_pct[i],
+    top_artists$artist_songs[i],
     top_artists$image[i]
   )
 })
 ```
 
-```{r}
-plots
-```
-
 
 ```{r}
 # Arrange plots in a grid layout
-grid_plot <- wrap_plots(plots, ncol = 7, widths = 1) 
-grid_plot +
+grid_plot <- wrap_plots(plots, ncol = 7, width = 1) +
     plot_annotation(title = "American Idol: Most Performed Artist",
+                    subtitle = "Elton John, Stevie Wonder, and The Beattles were the most performed",
                     caption = "Data curated by github/kkakey") &
-    theme(plot.margin = margin(0.1, 0.1, 0.1, 0.1, "cm"),
-          plot.title = element_text(hjust = 0.5))
+    theme(plot.title = element_text(hjust = 0.5, family = "Lobster", face = "bold", color = "#0033A0", size = 70),
+          plot.subtitle = element_text(hjust = 0.5, family = "Lobster", face = "italic", color = "#FF6F61", size = 55),
+          plot.caption = element_text(family = "Lobster", face = "italic", color = "#008080", size = 40),
+          plot.background = element_rect(fill = "azure", color = NA))
+
+ggsave("american_idol_top_artists_grid.png", plot = grid_plot, width = 8.5, height = 8)
+```
+
+```{r}
+auditions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-23/auditions.csv')
+finalists <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-23/finalists.csv')
+```
+
+```{r}
+audition_states <- auditions %>%
+    filter(season != 18) %>%
+    select(season, audition_city) %>%
+    mutate(audition_state =gsub("(.*, )(.*)", "\\2", audition_city)) %>%
+    group_by(audition_state) %>%
+    summarize(n_season = length(unique(season)))
+    
+finalist_states <- finalists %>%
+    select(Season, Hometown) %>%
+    mutate(finalist_state =gsub("(.*, )(.*)", "\\2", Hometown)) %>%
+    group_by(finalist_state) %>%
+    summarize(n_finalist = n())
+```
+
+```{r}
+audition_finalist_state <- tibble(
+    us_state = state.name,
+    audition = ifelse(us_state %in% audition_states$audition_state, 1, -1),
+    finalist = ifelse(us_state %in% finalist_states$finalist_state, 1, -1)) %>%
+    left_join(finalist_states, by = c("us_state" = "finalist_state")) %>%
+    left_join(audition_states, by = c("us_state" = "audition_state")) %>%
+    mutate(
+        n_season = ifelse(is.na(n_season), 0, n_season),
+        n_finalist = ifelse(is.na(n_finalist), 0, n_finalist),
+        bubble_size = case_when(
+            audition == 1 & finalist == 1 ~ n_finalist,
+            audition == -1 & finalist == 1 ~ n_finalist,
+            audition == 1 & finalist == -1 ~ n_season,
+            TRUE ~ 0
+        )
+    )
 ```
 
 
+```{r}
+state_plot <- ggplot(audition_finalist_state, 
+       aes(x = audition, y = finalist)) +
+    geom_jitter(aes(size = bubble_size, color = bubble_size), position = position_jitter(seed = 1))+
+    geom_hline(yintercept = 0, color = "gray90") +
+    geom_vline(xintercept = 0, color = "gray90")+
+    ggrepel::geom_text_repel(aes(label = us_state), position = position_jitter(seed = 1),
+                             family = "Lobster",
+                             size = 14) +
+    annotate("label", x = 1.5, y = -0.1, label = "Audition State", color = "#FF6F61", size = 14) +
+    annotate("label", y = 2, x = 0, label = "Finalist State", color = "#FF6F61", size = 14) +
+    # annotate("text", x = -1.5, y = -0.2, label = "No auditions,\nNo finalists", color = "#008080", size = 4,
+    #          family = "Lobster") +
+    # annotate("text", x = -1.5, y = 1.8, label = "Only finalists", color = "#008080", size = 4,
+    #          family = "Lobster")+
+    # annotate("text", x = 0.3, y = -1.8, label = "Only auditions", color = "#008080", size = 4,
+    #          family = "Lobster")+
+    # annotate("text", x = 1.6, y = 1.8, label = "Both auditions & finalists", color = "#008080", size = 4,
+    #          family = "Lobster")+
+    #annotate("label", y = 2, x = 0, label = "Finalist State", color = "#FF6F61", size = 3) +
+    scale_color_gradient(
+        low = "gray70",
+        high = "#0033A0",
+        breaks = c(0,2,4,6,8,10)
+    ) +
+    scale_size(guide = "none")+
+    labs(title = "American Idol: Connecting Audition States and Finalist States",
+         subtitle = "Tennesse and Florida had the highest number of finalists",
+         color = "#Finalists/#Seasons",
+         caption = "Color indicates the number of finalists for states with finalists and the number of seasons if it was only an audition state. \nData curated by github/kkakey") +
+    theme_void(16) +
+    theme(
+        text = element_text(family = "Lobster"),
+        plot.title = element_text(hjust = 0.5, face = "bold", color = "#0033A0", size = 50),
+        plot.subtitle = element_text(hjust = 0.5, face = "bold", color = "#FF6F61", size = 40),
+        plot.caption = element_text(face = "italic", color = "#008080", size = 30),
+        legend.position = "bottom",
+        plot.background = element_rect(fill = "azure", color = NA),
+        legend.text = element_text(size = 30),
+        legend.title = element_text(size = 30),
+    )
 
+ggsave("american_idol_audition_finalist_grid.png", plot = state_plot)
+```
 
