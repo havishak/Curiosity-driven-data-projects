@@ -186,7 +186,7 @@ state_plot <- ggplot(audition_finalist_state,
     ) +
     scale_size(guide = "none")+
     labs(title = "American Idol: Connecting Audition States and Finalist States",
-         subtitle = "Tennesse and Florida had the highest number of finalists",
+         subtitle = "Tennessee and Florida had the highest number of finalists",
          color = "#Finalists/#Seasons",
          caption = "Color indicates the number of finalists for states with finalists and the number of seasons if it was only an audition state. \nData curated by github/kkakey for Season 1-17") +
     theme_void(16) +

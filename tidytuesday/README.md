@@ -26,7 +26,7 @@ Each file has a date in its name for management purposes.
 
 **Approach:** Created a racing bar chart to show team with most wins across seasons
 
-<img src="products/tt_july1624_racingbars.gif" width="1000">
+<img src="products/tt_july1624_racingbars.gif" width="800">
 
 **Interesting finding:** After 2018, a lot of teams changed their names going away from Ladies to Women. For example, Arsenal Ladies/Chelsea Ladies to Arsenal Women/Chelsea Women. That's why the abruptness of the bars seem to stand out.
 
@@ -44,9 +44,9 @@ Each file has a date in its name for management purposes.
 
 **Approach:** Created an inforgraphics and contigency plot
 
-<img src="products/tt_july2324_american_idol_top_artists_grid.png" width="1000">
+<img src="products/tt_july2324_american_idol_top_artists_grid.png" width="800">
 
-<img src="products/tt_july2324_american_idol_audition_finalist_grid.png" width="1000">
+<img src="products/tt_july2324_american_idol_audition_finalist_grid.png" width="800">
 
 ## Contact
 
