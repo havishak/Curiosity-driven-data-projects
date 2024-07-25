@@ -32,6 +32,22 @@ Each file has a date in its name for management purposes.
 
 **Acknowledgment:** I followed this [blogpost](https://www.r-bloggers.com/2020/01/how-to-create-bar-race-animation-charts-in-r/) to learn about racing bars in R. 
 
+### July 23 (Week 30)
+
+**Data:** [American Idol Database](https://github.com/kkakey/American_Idol)
+
+**Packages:** `tidyverse`; `ggimage`; `patchwork`; `showtext`; `ggrepel`
+
+**Question:** 
+1. Which artist's songs were performed by the most contestants in each season of American Idol?
+2. What is the relationship between Audition States and Birthplace of Finalist's States?
+
+**Approach:** Created an inforgraphics and contigency plot
+
+<img src="products/tt_july2324_american_idol_top_artists_grid.png" width="1000">
+
+<img src="products/tt_july2324_american_idol_audition_finalist_grid.png" width="1000">
+
 ## Contact
 
 If you have any questions or suggestions, feel free to reach out to me:

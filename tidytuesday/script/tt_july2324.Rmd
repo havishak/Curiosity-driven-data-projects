@@ -114,6 +114,11 @@ grid_plot <- wrap_plots(plots, ncol = 7, width = 1) +
 ggsave("american_idol_top_artists_grid.png", plot = grid_plot, width = 8.5, height = 8)
 ```
 
+
+## Plot 2
+
+**Q. What is the relationship between audition states and finalist states?**
+
 ```{r}
 auditions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-23/auditions.csv')
 finalists <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-23/finalists.csv')
@@ -156,8 +161,8 @@ audition_finalist_state <- tibble(
 
 ```{r}
 state_plot <- ggplot(audition_finalist_state, 
-       aes(x = audition, y = finalist)) +
-    geom_jitter(aes(size = bubble_size, color = bubble_size), position = position_jitter(seed = 1))+
+       aes(x = audition, y = finalist, size = bubble_size, color = bubble_size)) +
+    geom_jitter(position = position_jitter(seed = 1))+
     geom_hline(yintercept = 0, color = "gray90") +
     geom_vline(xintercept = 0, color = "gray90")+
     ggrepel::geom_text_repel(aes(label = us_state), position = position_jitter(seed = 1),
@@ -183,7 +188,7 @@ state_plot <- ggplot(audition_finalist_state,
     labs(title = "American Idol: Connecting Audition States and Finalist States",
          subtitle = "Tennesse and Florida had the highest number of finalists",
          color = "#Finalists/#Seasons",
-         caption = "Color indicates the number of finalists for states with finalists and the number of seasons if it was only an audition state. \nData curated by github/kkakey") +
+         caption = "Color indicates the number of finalists for states with finalists and the number of seasons if it was only an audition state. \nData curated by github/kkakey for Season 1-17") +
     theme_void(16) +
     theme(
         text = element_text(family = "Lobster"),
