@@ -124,5 +124,5 @@ ggplot(aes(x = year, y = count,
 
 plot 
 
-ggsave("tt_july3024_summermovies.jpeg", plot, width = 8, height = 6)
+# ggsave("tt_july3024_summermovies.png", plot)
 ```
