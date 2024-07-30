@@ -48,6 +48,23 @@ Each file has a date in its name for management purposes.
 
 <img src="products/tt_july2324_american_idol_audition_finalist_grid.png" width="800">
 
+### July 30(Week 31)
+
+**Data:** [IMDb' Summer Movies](https://github.com/rfordatascience/tidytuesday/blob/master/data/2024/2024-07-30/readme.md)
+
+**Packages:** `tidyverse`, `showtext`, `ggstream`
+
+**Question:** What is the distribution of genres featuring "summer" in their titles over time?
+
+**Approach:** Created an aera plot
+
+<img src="products/tt_july3024_summermovies.jpeg" width="800">
+
+**Interesting finding:** The word is common in drama and comedy genres, and started appearing in other genres around 2000s.
+
+**Acknowledgment:** I was Gilbert Fontana's visual and followed this [blogpost](https://r-graph-gallery.com/web-stacked-area-chart-inline-labels.html).
+
+
 ## Contact
 
 If you have any questions or suggestions, feel free to reach out to me:

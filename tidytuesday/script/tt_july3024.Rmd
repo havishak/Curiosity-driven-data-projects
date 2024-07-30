@@ -1,0 +1,128 @@
+---
+title: "tt_jul2324"
+author: "Havisha Khurana"
+date: "2024-07-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      error = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(showtext)
+library(ggstream)
+```
+
+```{r}
+#load font
+# Add Google font and enable showtext
+font_add_google(name = "Open Sans", family = "Open Sans")
+showtext_auto()
+```
+
+```{r}
+#read data
+summer_movie_genres <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-30/summer_movie_genres.csv')
+summer_movies <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-30/summer_movies.csv')
+```
+
+```{r}
+sort(table(summer_movie_genres$genres))
+```
+
+## Plot
+
+**Q. What is the distribution of genres over years that have summer in their title?**
+
+```{r}
+RColorBrewer::display.brewer.pal(n = 9, name = "Oranges")
+```
+
+
+```{r}
+year_genre <- summer_movies |>
+    separate_longer_delim(genres, delim = ",") |>
+    mutate(genres = case_when(
+        genres %in% c("Horror", "Thriller", "Mystery", "Crime") ~ "Horror, Thriller, Mystery, Crime",
+        genres %in% c("Adventure", "Fantasy","Action") ~"Action, Fantasy, Adventure",
+        genres %in% c("Music", "Musical") ~ "Music",
+        TRUE ~ genres),
+           year = signif(year, 3)) |>
+    group_by(genres) |>
+    mutate(movie_in_genres = n()) |>
+    ungroup() |>
+    mutate(genres = ifelse(movie_in_genres < 31,"Other",genres),
+           year = ifelse(year < 1950, 1950, year)) |>
+    group_by(year, genres) |>
+    summarise(count = n()) |>
+    ungroup() |>
+    filter(!is.na(year))
+
+order <- year_genre |>
+    group_by(genres) |>
+    summarize(total = sum(count)) |>
+    arrange(desc(total)) |>
+    filter(genres != "Other") |>
+    mutate(order = row_number())
+
+order <- order |>
+    bind_rows(data.frame(genres = "Other", total = 158, order = 9))|>
+    mutate(text = str_wrap(paste0(genres,"-",total), 30),
+           position = c(700, 500, 400, 325, 250, 190, 150, 100, 50))
+
+# Create an area plot
+plot <- year_genre |>
+    mutate(genres = factor(genres, levels = order$genres)) |>
+ggplot(aes(x = year, y = count, 
+           fill = genres)) +
+  geom_stream(aes(color = genres), type = "ridge", bw = 1, show.legend = F)+
+  scale_fill_brewer(palette = "Oranges",
+                    direction = 1)+
+  scale_color_brewer(palette = "Oranges",
+                     direction = 1) +   
+  scale_x_continuous(breaks = seq(1950, 2020, 10),
+                       labels = c("<1954", "55-64", "65-74", "75-84",
+                                  "85-94", "95-2004","05-14","15-2024"),
+                     limits = c(1950, 2032)) +
+  scale_y_continuous(expand = c(0,0)) +
+  geom_text(data = order, aes(x = 2025, y = position, label = text), size = 3, show.legend = F, color = "gray20")+
+    #Title
+     annotate("text", x = 1957, y = 475,
+           label = "`Summer`",
+           hjust=0,
+           size=12,
+           lineheight=.9,
+           fontface="bold", family="Open Sans",
+           color="darkorange3") +
+    annotate("text", x = 1983, y = 475,
+           label = "In Titles:",
+           hjust=0,
+           size=12,
+           lineheight=.9,
+           fontface="bold", family="Open Sans",
+           color="gray10") +
+    #Subtitle
+     annotate("text", x = 1960, y = 375,
+           label = "Dominant in Drama and Comedy,\nBlossoming in Post-2000s Romance",
+           hjust=0,
+           size=5,
+           lineheight=.9,
+           fontface="italic", family="Open Sans",
+           color="gray20") +
+    coord_cartesian(clip = "off")+
+    labs(x = "",
+         y = "",
+         caption = "Counts show total movies by genres.\nData scrapped from IMDb with the word summer in title; curated by rfordatascience/tidytuesday")+
+    theme_void(base_family = "Open Sans") +
+    theme(axis.text.x = element_text(angle = 10, color ="gray20", size = 8),
+          plot.caption = element_text(face="italic", color="gray20", hjust = 0))
+
+plot 
+
+ggsave("tt_july3024_summermovies.jpeg", plot, width = 8, height = 6)
+```
