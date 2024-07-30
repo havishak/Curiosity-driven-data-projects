@@ -50,7 +50,7 @@ Each file has a date in its name for management purposes.
 
 ### July 30(Week 31)
 
-**Data:** [IMDb' Summer Movies](https://github.com/rfordatascience/tidytuesday/blob/master/data/2024/2024-07-30/readme.md)
+**Data:** [Internet Movie Database](https://github.com/rfordatascience/tidytuesday/blob/master/data/2024/2024-07-30/readme.md)
 
 **Packages:** `tidyverse`, `showtext`, `ggstream`
 

@@ -117,7 +117,7 @@ ggplot(aes(x = year, y = count,
     coord_cartesian(clip = "off")+
     labs(x = "",
          y = "",
-         caption = "Counts show total movies by genres.\nData scrapped from IMDb with the word summer in title; curated by rfordatascience/tidytuesday")+
+         caption = "Counts show total movies by genres.\nData from Internet Movie Database with the word summer in title; curated by rfordatascience/tidytuesday")+
     theme_void(base_family = "Open Sans") +
     theme(axis.text.x = element_text(angle = 10, color ="gray20", size = 8),
           plot.caption = element_text(face="italic", color="gray20", hjust = 0))
