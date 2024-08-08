@@ -1,0 +1,242 @@
+---
+title: "tt_august624"
+author: "Havisha Khurana"
+date: "2024-08-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(showtext)
+```
+
+```{r}
+font_add_google(name = "Open Sans", family = "Open Sans")
+showtext_auto()
+```
+
+```{r}
+olympics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-06/olympics.csv')
+```
+
+```{r}
+# from 1900-2016
+ind_olympics <- olympics %>%
+    filter(team %in% c("India", "India-1","India-2"))
+
+```
+
+# Plot 1 
+
+```{r}
+year_sport_n <- ind_olympics |>
+    filter(season == "Summer") |>
+    group_by(year, sport) |>
+    summarize(representation = n(),
+              medals = sum(!is.na(medal)),
+              game = paste(year, city)) |>
+    distinct()
+```
+
+
+```{r}
+#from wikipedia - can't confirmt the accuracy as other reports ~124 athletes
+tokyo20_representation <- read_html("https://en.wikipedia.org/wiki/India_at_the_2020_Summer_Olympics#cite_note-List-6") %>%
+    html_elements("table") %>%
+    .[2] %>%
+    html_table() %>%
+    .[[1]] %>%
+    janitor::clean_names() %>%
+    mutate(year = 2021,
+        game = "2021 Tokyo",
+        representation = total) %>%
+    filter(sport != "Total")
+
+tokyo20_medals <- read_html("https://en.wikipedia.org/wiki/India_at_the_2020_Summer_Olympics#cite_note-List-6") %>%
+    html_elements("table") %>%
+    .[3] %>%
+    html_table() %>%
+    .[[1]] %>%
+    janitor::clean_names() %>%
+    mutate(year = 2021,
+           medals = total,
+           game = "2021 Tokyo") %>%
+    filter(sport != "Total")
+
+tokyo_df <- tokyo20_representation %>%
+    left_join(tokyo20_medals %>% select(sport, medals)) %>%
+    mutate(medals = ifelse(is.na(medals), 0, medals),
+           sport = case_when(
+               sport == "Table tennis" ~ "Table Tennis",
+               sport == "Field hockey" ~ "Hockey",
+               TRUE ~ sport)) 
+```
+
+
+```{r}
+paris24_representation <- read_html("https://en.wikipedia.org/wiki/India_at_the_2024_Summer_Olympics") %>%
+    html_elements("table") %>%
+    .[8] %>%
+    html_table() %>%
+    .[[1]] %>%
+    janitor::clean_names() %>%
+    mutate(year = 2024,
+           game = "2024 Paris",
+           representation = athletes, medals = NA,
+           sport = gsub("(.*)(\\[a\\])", "\\1", sport),
+           sport = case_when(
+               sport == "Table tennis" ~ "Table Tennis",
+               sport == "Field hockey" ~ "Hockey",
+               TRUE ~ sport)) %>%
+    filter(sport != "Total")
+```
+
+```{r}
+plot1_df <- year_sport_n %>%
+    rbind(tokyo_df) %>%
+    rbind(paris24_representation) %>%
+    group_by(year) %>%
+    mutate(total = sum(representation, na.rm = T)) %>%
+    ungroup() %>%
+    mutate(representation = case_when(
+        representation < 2 ~ as.character(representation),
+        representation < 6 ~ "2-5",
+        representation < 11 ~ "6-10",
+        representation < 21 ~ "11-20",
+        representation > 20 ~ ">20"
+    ),
+    representation = factor(representation, levels = c("1","2-5","6-10","11-20",">20")))
+
+
+plot1 <- ggplot(plot1_df) +
+    geom_point( aes(x = game, y = sport, color = representation, size = representation),
+                alpha = 0.6) +
+    #scale_size_manual(values = c(1.5,2,4,5,6))+
+    #scale_color_brewer(palette = "BuPu")+
+    scale_color_manual(values = c("black", "#DF0024", "#0085C7", "#009F3D", "#F4C300"))+
+    geom_text(data = plot1_df %>% select(game, total) %>% distinct(),
+              aes(x = game, y = 1, label = total),
+              size = 2.25,
+              angle = 5)+
+    scale_y_discrete(limits = c("Total", sort(unique(plot1_df$sport), decreasing = TRUE)))+
+
+    labs(x = "",
+         y = "",
+         title = "<span style='color:#FF9933;'>In</span><span style='color:#000080;'>di</span><span style='color:#138808;'>an</span> Contingent at the Summer Olympics",
+         color = "",
+         size = "",
+         caption = "Source: RGriffin Olympic Dataset till 2016; Wikipedia page for 2021 and 2024") +
+    theme_minimal(14)+
+    theme(
+        text = element_text(family = "Open Sans"),
+        plot.title = ggtext::element_markdown(hjust =0.5, face = "bold"),
+        axis.text.x = element_text(angle = 60, hjust = 0.95, color = "gray40",
+                                   size = 10),
+        plot.caption = element_text(color = "gray40", size = 10),
+        panel.grid.major.y = element_blank(),
+        legend.position = "right"
+    )
+
+ggsave("representation.jpeg")
+```
+
+# Plot 2 -gender representation
+
+```{r}
+
+year_gender_n <- ind_olympics |>
+    filter(season == "Summer") |>
+    group_by(year, sex) |>
+    summarize(representation = n(),
+             #medals = sum(!is.na(medal)),
+              game = paste(year, city)) |>
+    distinct() |>
+    mutate(sex = ifelse(sex == "M", "men", "women")) |>
+    pivot_wider(
+        names_from = sex,
+        values_from = representation
+    ) |>
+    mutate(across(c(men, women), ~ifelse(is.na(.x), 0, .x)),
+           total = men + women)
+
+plot2_df <- year_gender_n |>
+    rbind(tokyo_df |> summarize(
+        year = year,
+        game = game,
+        men = sum(men), women = sum(women),
+        total = sum(total))) |>
+    rbind(paris24_representation |> summarize(
+        year = year,
+        game = game,
+        men = sum(men), women = sum(women),
+        total = sum(athletes))) |>
+    distinct() |>
+    mutate(prop_men = men/total,
+           prop_women = women/total)
+
+plot2 <- ggplot(plot2_df, aes(x = year))+
+    geom_line(aes(y = prop_men), color = "orange") +
+    geom_ribbon(aes(ymin = 0.5,ymax = prop_men), fill = "orange", alpha = 0.5)+
+    geom_line(aes(y = prop_women), color = "coral") +
+    geom_ribbon(aes(ymin = prop_women,ymax = 0.5), fill = "coral", alpha = 0.5) +
+    scale_x_continuous(
+        breaks = sort(unique(plot2_df$year)),
+        labels = sort(unique(plot2_df$game))
+    ) +
+    labs(
+        x = "",
+        y = "Representation",
+        title = "<span style='color:darkorange2;'>Men</span> and <span style='color:coral4;'>Women</span> representatives in the <span style='color:#FF9933;'>In</span><span style='color:#000080;'>di</span><span style='color:#138808;'>an</span> Contingent",
+    ) +
+    theme_minimal()+
+    annotate(
+        geom = "text",
+        x = 1988,
+        y = 0.9,
+        label = "Men",
+        color = "darkorange2"
+    )+
+    annotate(
+        geom = "text",
+        x = 1988,
+        y = 0.1,
+        label = "Women",
+        color = "coral4"
+    )+
+    annotate(
+        geom = "text",
+        x = 1896,
+        y = -0.075,
+        label = "Total",
+        color = "gray40",
+        size = 2.25
+    )+
+    geom_text(data = plot1_df %>% select(year, total) %>% distinct(),
+              aes(x = year, y = -0.075, label = total),
+              size = 2.25,
+              angle = 8)+
+    scale_y_continuous(expand = c(0.1,0),
+                       labels = scales::percent)+
+    theme(
+        text = element_text(family = "Open Sans"),
+        plot.title = ggtext::element_markdown(hjust =0.5, face = "bold"),
+        axis.text.x = element_text(angle = 60, hjust = 0.95, color = "gray40",
+                                   size = 10),
+        plot.caption = element_text(color = "gray40", size = 10),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "gray90", linewidth = 0.2),
+        legend.position = "right"
+    )
+    
+
+ggsave("men_women_olympics.jpeg")
+```
+
+# Plt 3
