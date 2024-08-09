@@ -64,6 +64,20 @@ Each file has a date in its name for management purposes.
 
 **Acknowledgment:** I was Gilbert Fontana's visual and followed this [blogpost](https://r-graph-gallery.com/web-stacked-area-chart-inline-labels.html).
 
+### August 6 (Week 32)
+
+**Data:** [Olympics Data](https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results/)
+
+**Packages:** `tidyverse`, `showtext`, `rvest`, `here`
+
+**Question:** How has India's journey been in the Summer Olympics?
+
+**Approach:** Wrote a [post](script/tt_august624.html) using Rmd to capture certain details; sharing one image from the post that I really liked.
+
+<img src="products/tt_aug624_representation.jpeg" width="800">
+
+**Acknowledgment:** I took inspiration from this [blogpost](https://flourish.studio/blog/visualizing-olympics/).
+
 
 ## Contact
 
