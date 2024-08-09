@@ -1,0 +1,466 @@
+---
+title: "India at Summer Olympics"
+subtitle: "TidyTuesday 8/6/24"
+author: "Havisha Khurana"
+output: 
+    html_document:
+        theme: journal
+        toc: yes
+        toc_float: 
+            collapsed: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      warning = FALSE,
+                      message = FALSE,
+                      error = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(showtext)
+```
+
+```{r}
+font_add_google(name = "Open Sans", family = "Open Sans")
+showtext_auto()
+```
+
+
+```{r}
+olympics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-06/olympics.csv')
+```
+
+```{r}
+# from 1900-2016
+ind_olympics <- olympics %>%
+    filter(team %in% c("India", "India-1","India-2"))
+
+```
+
+
+```{r}
+#from wikipedia
+tokyo20_representation <- read_html("https://en.wikipedia.org/wiki/India_at_the_2020_Summer_Olympics#cite_note-List-6") %>%
+    html_elements("table") %>%
+    .[2] %>%
+    html_table() %>%
+    .[[1]] %>%
+    janitor::clean_names() %>%
+    mutate(year = 2021,
+        game = "2021 Tokyo",
+        representation = total) %>%
+    filter(sport != "Total")
+
+tokyo20_medals <- read_html("https://en.wikipedia.org/wiki/India_at_the_2020_Summer_Olympics#cite_note-List-6") %>%
+    html_elements("table") %>%
+    .[4] %>%
+    html_table() %>%
+    .[[1]] %>%
+    janitor::clean_names() %>%
+    mutate(year = 2021,
+           medals = total,
+           game = "2021 Tokyo")
+
+tokyo_df <- tokyo20_representation %>%
+    left_join(tokyo20_medals %>% select(sport, medals)) %>%
+    mutate(medals = ifelse(is.na(medals), 0, medals),
+           sport = case_when(
+               sport == "Table tennis" ~ "Table Tennis",
+               sport == "Field hockey" ~ "Hockey",
+               sport == "Equestrian" ~ "Equestrianism",
+               TRUE ~ sport)) 
+```
+
+```{r}
+paris24_representation <- read_html("https://en.wikipedia.org/wiki/India_at_the_2024_Summer_Olympics") %>%
+    html_elements("table") %>%
+    .[8] %>%
+    html_table() %>%
+    .[[1]] %>%
+    janitor::clean_names() %>%
+    mutate(year = 2024,
+           game = "2024 Paris",
+           representation = athletes, medals = NA,
+           sport = gsub("(.*)(\\[a\\])", "\\1", sport),
+           sport = case_when(
+               sport == "Table tennis" ~ "Table Tennis",
+               sport == "Field hockey" ~ "Hockey",
+               sport == "Equestrian" ~ "Equestrianism",
+               TRUE ~ sport)) %>%
+    filter(sport != "Total")
+```
+
+```{r}
+logo_path <- here::here("images/ioc_logo_wo_rings.png")
+```
+
+
+```{r}
+year_sport_n <- ind_olympics |>
+    filter(season == "Summer") |>
+    select(id, name, sex, year, sport, city) |>
+    distinct() |>
+    group_by(year, sport) |>
+    summarize(representation = n(),
+              game = paste(year, city)) |>
+    distinct()
+
+plot1_df <- year_sport_n %>%
+    rbind(tokyo_df) %>%
+    rbind(paris24_representation) %>%
+    group_by(year) %>%
+    mutate(total = sum(representation, na.rm = T)) %>%
+    ungroup() %>%
+    mutate(representation = case_when(
+        representation < 2 ~ as.character(representation),
+        representation < 6 ~ "2-5",
+        representation < 11 ~ "6-10",
+        representation < 21 ~ "11-20",
+        representation > 20 ~ ">20"
+    ),
+    representation = factor(representation, levels = c("1","2-5","6-10","11-20",">20")))
+```
+
+```{r}
+ind_independence <- tibble(
+    year = 1947,
+    game = "1948 London"
+)
+```
+
+## It's Olympics Time!
+
+This week, for TidyTuesday, I'm exploring Olympics data from 1896-2024. Particularly, I'm interested in exploring **India's** representation in the Olympics over time. I used the TidyTuesday data for data until 2016 and then scraped data for 2021 and 2024 Summer Olympics.
+
+-   First participated: 1900 as *British-India*
+-   First participated as an **Independent Country** in 1948
+
+### How many representatives, events, and medals?
+
+
+```{r}
+year_total_medal_sports <- ind_olympics |>
+  filter(season == "Summer") |>
+  #group_by(year, event) |>
+  # mutate(medals = ifelse(sum(!is.na(medal), na.rm = T) == 0,
+  #                        0,
+  #                        length(unique(medal)))
+  #        )|>
+  group_by(year) |>
+  summarize(
+    representatives_n = length(unique(id)),
+    sport_n = length(unique(sport)),
+    event_n = length(unique(event)),
+    medals_n = length(unique(event[!is.na(medal)])),
+    game = paste(year, city)
+  ) |>
+  distinct()
+
+tokyo_df_total <- tokyo_df |>
+  summarize(
+    year = year,
+    game = game,
+    representatives_n = sum(representation),
+    sport_n = n(),
+    event_n = NA,
+    medals_n = sum(medals)
+  ) |>
+  distinct()
+
+paris_df_total <- paris24_representation |>
+  summarize(
+    year = year,
+    game = game,
+    representatives_n = sum(representation),
+    sport_n = n(),
+    event_n = NA,
+    medals_n = NA
+  ) |>
+  distinct()
+
+plot3_df <- year_total_medal_sports |>
+  rbind(tokyo_df_total) |>
+  rbind(paris_df_total)
+```
+
+
+```{r fig.height = 8, fig.width = 10}
+plot3 <- ggplot(plot3_df) +
+  geom_line(aes(x = year, y = representatives_n), color = "#138808", linewidth  = 1) +
+  geom_line(aes(x = year, y = sport_n*4), color = "#FF9933", linewidth = 1) +
+  geom_line(aes(x = year, y = medals_n*4), color = "#FF9933",linewidth = 1, linetype = 3)+
+  geom_vline(xintercept = 1947, color  = "#06038D", linetype = 2) + #India independence
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = "# Representatives",
+    breaks = seq(0,120, 20),
+    # Add a second axis and specify its features
+    sec.axis = sec_axis( trans=~./4, name="# Sports/Medals")
+  ) +
+  scale_x_continuous(
+    breaks = plot3_df$year,
+    labels = plot3_df$game,
+  ) + 
+  labs(
+    x = "",
+    caption = "Source: RGriffin Olympic Dataset for 1900-2016, and Wikipedia for 2021 and 2024.\nTotal includes representatives who participated, doesn't include representatives on reserve for 2024",
+    title = paste0("Representation, Sports, and Medals<br>for the ,<img src = '", logo_path,"' height = 18> Summer Olympics Contingent")
+  )+
+     annotate(
+    geom = "label", 
+    x = 1945, 
+    y = 86,
+    label = "Became Independent",
+    color = "#06038D",
+    size = 8
+  ) +
+  annotate(
+    geom = "line", 
+    x = c(1958,1965), 
+    y = c(110,110),
+    linetype = 1,
+    color = "#FF9933",
+    linewidth = 0.75
+  ) +
+  annotate(
+    geom = "line", 
+    x = c(1958,1965), 
+    y = c(100,100),
+    linetype = 3,
+    color = "#FF9933",
+    linewidth = 0.75
+  ) +
+    annotate(
+    geom = "text", 
+    x =1975, 
+    y = 110,
+    label = ":# Sports",
+    color = "#FF9933",
+    size = 10
+  ) +
+  annotate(
+    geom = "text", 
+    x = 1975, 
+    y = 100,
+    label = ":# Medals",
+    color = "#FF9933",
+    size = 10
+  ) +
+  theme_minimal(32)+
+  theme(
+     axis.title.y = element_text(color = "#138808", size=26),
+    axis.title.y.right = element_text(color = "#FF9933", size=26),
+     text = element_text(family = "Open Sans"),
+        plot.title = ggtext::element_markdown(hjust =0.5, face = "bold", lineheight = 0.25),
+        axis.text.x = element_text(angle = 60, hjust = 0.95, color = "gray40",
+                                   size = 26),
+        plot.caption = element_text(color = "gray40", size = 24, lineheight = 0.5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "azure2", linewidth = 0.2),
+        legend.position = "right"
+  )
+
+plot3
+#ggsave("overview.jpeg", plot3, height = 6, width = 8)
+```
+
+- **Pre-Independence Era**: Indian contingent had around 20 representatives competing in fewer than 5 sports.
+  
+- **1948 London Olympics**: First Olympics after India's independence with about 80 representatives in 10 sports.
+
+- **Fluctuations**: Number of representatives and sports fluctuated since 1948, with the lowest in 1968 and 1976 (over 20 representatives in 5 sports).
+
+- **Recent Trends**: In the last three Olympics, India sent over 100 representatives competing in more than 13 sports.
+
+- **Medal Tally**: India won over 5 medals in the 2012 London and 2021 Tokyo Olympics.
+
+- **Field Hockey Success**: Indian men's field hockey team won medals in every Olympic edition from 1928 (Amsterdam) to 1980 (Moscow), and again a bronze in 2021 Tokyo. 
+
+### What is the gender representation?
+
+
+
+```{r fig.height = 8, fig.width = 10}
+
+year_gender_n <- ind_olympics |>
+    filter(season == "Summer") |>
+    select(id, name, sex, year, sport, city) |>
+    distinct() |>
+    group_by(year, sex) |>
+    summarize(representation = n(),
+             #medals = sum(!is.na(medal)),
+              game = paste(year, city)) |>
+    distinct() |>
+    mutate(sex = ifelse(sex == "M", "men", "women")) |>
+    pivot_wider(
+        names_from = sex,
+        values_from = representation
+    ) |>
+    mutate(across(c(men, women), ~ifelse(is.na(.x), 0, .x)),
+           total = men + women)
+
+plot2_df <- year_gender_n |>
+    rbind(tokyo_df |> summarize(
+        year = year,
+        game = game,
+        men = sum(men), women = sum(women),
+        total = sum(total))) |>
+    rbind(paris24_representation |> summarize(
+        year = year,
+        game = game,
+        men = sum(men), women = sum(women),
+        total = sum(athletes))) |>
+    distinct() |>
+    mutate(prop_men = men/total,
+           prop_women = women/total)
+
+plot2 <- ggplot(plot2_df, aes(x = year))+
+    geom_line(aes(y = prop_men), color = "orange") +
+    geom_ribbon(aes(ymin = 0.5,ymax = prop_men), fill = "orange", alpha = 0.5)+
+    geom_line(aes(y = prop_women), color = "coral") +
+    geom_ribbon(aes(ymin = prop_women,ymax = 0.5), fill = "coral", alpha = 0.5) +
+    geom_vline(xintercept = 1947, color  = "#06038D", linetype = 2) + #India independence
+    scale_x_continuous(
+        breaks = sort(unique(plot2_df$year)),
+        labels = sort(unique(plot2_df$game))
+    ) +
+    labs(
+        x = "",
+        y = "Representation",
+        title = paste0("<span style='color:darkorange2;'>Men</span> and <span style='color:coral4;'>Women</span> representatives <br>in the ", "<img src = '", logo_path,"' height = 18> Summer Olympics Contingent"),
+         caption = "Source: RGriffin Olympic Dataset for 1900-2016, and Wikipedia for 2021 and 2024.\nTotal includes representatives who participated, doesn't include representatives on reserve for 2024."
+    ) +
+    theme_minimal(30)+
+    annotate(
+        geom = "text",
+        x = 1988,
+        y = 0.9,
+        label = "Men",
+        color = "darkorange2",
+        size = 10
+    )+
+    annotate(
+        geom = "text",
+        x = 1988,
+        y = 0.1,
+        label = "Women",
+        color = "coral4",
+        size = 10
+    )+
+    annotate(
+        geom = "text",
+        x = 1896,
+        y = -0.075,
+        label = "Total",
+        color = "gray40",
+        size = 10
+    )+
+     annotate(
+    geom = "label", 
+    x = 1945, 
+    y = 0.5,
+    label = "Became Independent",
+    color = "#06038D",
+    size = 8
+  ) +
+    geom_text(data = plot1_df %>% select(year, total) %>% distinct(),
+              aes(x = year, y = -0.075, label = total),
+              size = 8,
+              angle = 8)+
+    scale_y_continuous(expand = c(0.1,0),
+                       labels = scales::percent,
+                       breaks = seq(0,1,0.1))+
+    theme(
+        text = element_text(family = "Open Sans"),
+        plot.title = ggtext::element_markdown(hjust =0.5, face = "bold", lineheight = 0.25),
+        axis.text.x = element_text(angle = 60, hjust = 0.95, color = "gray40",
+                                   size = 24),
+        plot.caption = element_text(color = "gray40", size = 24,                            lineheight = 0.5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "azure2", linewidth = 0.2),
+        legend.box.spacing = margin(0.1)
+    )
+    
+plot2
+#ggsave("men_women_olympics.jpeg",plot2, height = 6, width = 9)
+```
+
+- **Male-Dominated Contingent**: Male representatives dominated India's Olympic contingent until the 1976 Montreal Games.
+
+- **Increase in Female Representation**: Since 1976, over 15% of the contingent has consistently been women.
+
+- **Recent Trend**: In the last three Olympic editions, more than 40% of the Indian contingent was women.
+
+### What sports do we compete in?
+
+
+```{r fig.height = 10, fig.width = 10}
+plot1 <- ggplot(plot1_df) +
+    #geom_vline(xintercept = "1948 London", color = "#06038D", linetype = 2)+
+    geom_point( aes(x = game, y = sport, color = representation, size = representation),
+                alpha = 0.6) +
+    #scale_size_manual(values = c(1.5,2,4,5,6))+
+    #scale_color_brewer(palette = "BuPu")+
+    scale_color_manual(values = c("black", "#DF0024", "#0085C7", "#009F3D", "#F4C300"))+
+  
+    geom_text(data = plot1_df %>% select(game, total) %>% distinct(),
+              aes(x = game, y = 1, label = total),
+              size = 7,
+              angle = 5)+
+    scale_y_discrete(limits = c("Total", sort(unique(plot1_df$sport), decreasing = TRUE)))+
+    labs(x = "",
+         y = "",
+         title = paste0("<img src = '", logo_path,"' height = 18> Summer Olympics Contingent by Sport"),
+         color = "",
+         size = "",
+         caption = "Source: RGriffin Olympic Dataset for 1900-2016, and Wikipedia for 2021 and 2024.\nTotal includes representatives who participated, doesn't include representatives on reserve for 2024") +
+  #    annotate(
+  #   geom = "label", 
+  #   x = "1948 London", 
+  #   y = "Archery",
+  #   label = "Became Independent",
+  #   color = "#06038D",
+  #   size = 8
+  # )+
+    theme_minimal(30)+
+    theme(
+        text = element_text(family = "Open Sans"),
+        plot.title = ggtext::element_markdown(hjust =0.5, face = "bold"),
+        axis.text.x = element_text(angle = 60, hjust = 0.95, color = "gray40",
+                                   size = 24),
+        plot.caption = element_text(color = "gray40", size = 24,
+                                    lineheight = 0.5, face = "italic"),
+        panel.grid.major.y = element_blank(),
+        legend.box.spacing = margin(0.1)
+    )
+
+plot1
+#ggsave("representation.jpeg", plot1, height = 6.5, width = 8)
+```
+
+- **Consistent Participation in Athletics**: India has participated in athletics in all Olympic editions, with the contingent size increasing notably since the 1996 Atlanta Games.
+
+- **Field Hockey**: Field hockey has consistently been a major sport in India's Olympic contingent.
+
+- **Growing Representation in Specific Sports**: Archery, badminton, boxing, shooting, and wrestling have seen significant representation in recent years. Table tennis, tennis, and weightlifting also have notable participation.
+
+- **Limited Participation in Certain Sports**: India has only participated once in basketball and fencing, and four times in football and thrice in cycling.
+
+- **Niche Sports**: There has been a small yet noticeable increase in Indian representation in niche sports such as equestrianism, judo, rowing, and sailing.
+
+<!-- # Timeline -->
+
+```{r}
+# c(1900 = "First athlete to represent any Asian country, though he was born to British parents in Calculta (India)",
+#   1920 = "First native athletes participated",
+#   1924 = "First women participated in Tennis, born to British parents in India",
+#   1928 = "Hockey medal streak begins; India continues to win until 1972 Munich (7 gold, 1 silver, 2 bronze)",
+#   1932 = "2 representatives in Mixed Painting",
+#   1936 = "First time participating in weight-lifting and wrestling"
+# )
+  
+```
