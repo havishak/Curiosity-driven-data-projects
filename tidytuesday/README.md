@@ -88,7 +88,7 @@ Each file has a date in its name for management purposes.
 
 **Approach:** Look at the most-recurring words in the thme over a period of quarter-century and arranged them like a time-line.
 
-<img src="products/tt_aug1324_world_expo_themes.jpeg" width="800">
+<img src="products/tt_august1324_world_expo_themes.jpeg" width="800">
 
 
 ## Contact
