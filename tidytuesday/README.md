@@ -78,6 +78,18 @@ Each file has a date in its name for management purposes.
 
 **Acknowledgment:** I took inspiration from this [blogpost](https://flourish.studio/blog/visualizing-olympics/).
 
+### August 13 (Week 33)
+
+**Data:** [World's Fairs](https://en.wikipedia.org/wiki/World%27s_fair)
+
+**Packages:** `dplyr`, `ggplot2`, `wordcloud`, `tm`, `purr`, `grid`, `png`
+
+**Question:** What have been the world expo themes?
+
+**Approach:** Look at the most-recurring words in the thme over a period of quarter-century and arranged them like a time-line.
+
+<img src="products/tt_aug1324_world_expo_themes.jpeg" width="800">
+
 
 ## Contact
 
