@@ -1,0 +1,151 @@
+---
+title: "tt_august1324"
+author: "Havisha Khurana"
+date: "2024-08-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(wordcloud)
+library(tm)
+library(purrr)
+library(grid)
+library(png)
+```
+
+```{r}
+# load data
+worlds_fairs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-13/worlds_fairs.csv')
+```
+
+
+```{r}
+worlds_fairs <- worlds_fairs %>%
+    mutate(period = cut(start_year, 
+                        breaks = seq(1850, max(start_year) + 25, by = 25), 
+                        right = FALSE,
+                        labels = FALSE))
+
+wf_25yr <- split(worlds_fairs, worlds_fairs$period)
+```
+
+
+```{r}
+# Define the function to generate word clouds for every 25 years
+generate_word_clouds <- function(data, filename) {
+    
+    # Create a text corpus for the period
+    corpus <- VCorpus(VectorSource(data$theme))
+    corpus <- tm_map(corpus, content_transformer(tolower))  # Convert to lowercase
+    corpus <- tm_map(corpus, removePunctuation)             # Remove punctuation
+    corpus <- tm_map(corpus, removeNumbers)                 # Remove numbers
+    corpus <- tm_map(corpus, removeWords, stopwords("english")) # Remove common stopwords
+    
+    # Create a Term-Document Matrix
+    tdm <- TermDocumentMatrix(corpus)
+    matrix <- as.matrix(tdm)
+    word_freqs <- sort(rowSums(matrix), decreasing = TRUE)[1:4]
+    
+    colors <- brewer.pal(6, "Set2")
+    
+    # save wordcloud setting
+    grDevices::png(filename, width = 1000, height = 1000, bg = "transparent")
+    par(mar = c(0, 0, 0, 0)) # Remove margins
+    
+    # Generate the word cloud
+    wordcloud(
+      words = names(word_freqs), 
+      freq = word_freqs, 
+      min.freq = 1, 
+      max.words = 4, 
+      rot.per = 0,
+      random.order = FALSE,
+      random.color = TRUE,
+      colors = colors,
+      scale = c(19, 0.5)
+    )
+    dev.off()
+    
+  }
+
+# Generate and save word clouds
+filenames <- paste0(here::here(),"/images/word_cloud_theme_",1:7,".png")
+map2(wf_25yr,filenames, ~generate_word_clouds(.x, .y))
+
+```
+
+
+```{r}
+#read PNGs:
+image_grob <- map(filenames, ~grid::rasterGrob(png::readPNG(.x), interpolate = TRUE))
+```
+
+```{r}
+plot_df <- worlds_fairs %>%
+    group_by(period) %>%
+    summarize(
+        axis_label = paste0(min(start_year)," - ", max(start_year)),
+        fairs_n = n(),
+        attending_countries_avg = round(mean(attending_countries, na.rm = T))
+    ) %>%
+    mutate(axis_label = ifelse(period == 1, paste0(axis_label, "\n",
+                            fairs_n," Fairs\n",
+                            attending_countries_avg, " Countries Attending"),
+                            paste0(axis_label, "\n",
+                            fairs_n," F\n",
+                            attending_countries_avg, " CA"))
+    )
+
+
+plot <- ggplot(plot_df, aes(x = period, y = 1, size = attending_countries_avg, color = factor(period))) +
+    geom_point(shape = "\u2BCA",
+               show.legend = F, alpha = 0.1) +
+    scale_size(range = c(50, 70), name="Avg. Attending countries")+
+    annotation_custom(grobTree(image_grob[[1]]), 
+                      xmin = 0.6, xmax = 1.4, ymin = 0.966, ymax = 1.056)+
+    annotation_custom(grobTree(image_grob[[2]]), 
+                      xmin = 1.6, xmax = 2.4, ymin = 0.966, ymax = 1.056)+
+    annotation_custom(grobTree(image_grob[[3]]), 
+                      xmin = 2.6, xmax = 3.4, ymin = 0.966, ymax = 1.056)+
+    annotation_custom(grobTree(image_grob[[4]]), 
+                      xmin = 3.6, xmax = 4.4, ymin = 0.966, ymax = 1.056)+
+    annotation_custom(grobTree(image_grob[[5]]), 
+                      xmin = 4.6, xmax = 5.4, ymin = 0.966, ymax = 1.056)+
+    annotation_custom(grobTree(image_grob[[6]]), 
+                      xmin = 5.6, xmax = 6.4, ymin = 0.966, ymax = 1.056)+
+    annotation_custom(grobTree(image_grob[[7]]), 
+                      xmin = 6.6, xmax = 7.4, ymin = 0.966, ymax = 1.056)+
+    scale_x_continuous(
+        breaks = 1:7,
+        labels = plot_df$axis_label,
+        name = "",
+        limits = c(0.5,7.5)
+    ) +
+    labs(
+        title = "World Expo Themes Over Time",
+        subtitle = "From Industry to Energy",
+        y = "",
+        caption = "Source: Wikipedia\nShowing top 4 words in the theme from each quarter-century"
+    ) +
+    ylim(1, 1.025)+
+    theme(
+        plot.background = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_blank(),
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 18),
+        plot.subtitle = element_text(face = "italic", hjust = 0.5, size = 14),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_text(face = "italic")
+    )
+
+#plot
+ggsave(paste0(here::here(),"/products/tt_august1324_world_expo_themes.jpeg"), width = 10, height = 2.85)
+```
+
