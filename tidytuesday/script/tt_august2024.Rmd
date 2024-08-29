@@ -1,0 +1,63 @@
+---
+title: "tt_august1324"
+author: "Havisha Khurana"
+date: "2024-08-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(emoji)
+library(forcats)
+library(ggthemes)
+```
+
+```{r}
+# load data
+english_monarchs_marriages_df <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-20/english_monarchs_marriages_df.csv')
+```
+```{r}
+matches_plot <- english_monarchs_marriages_df %>%
+    mutate(monarch_first_name = str_extract(king_name, "^[^\\s]+"),
+           consort_first_name = str_extract(consort_name, "^[^\\s]+")) %>%
+    group_by(monarch_first_name, consort_first_name) %>%
+    summarize(
+        combinations = n(),
+        labels = paste0(monarch_first_name, emoji("sparkling heart"), consort_first_name)
+    ) %>%
+    distinct() %>%
+    arrange(desc(combinations)) %>%
+    filter(combinations > 1) %>%
+    ungroup() %>%
+    ggplot(aes(y = fct_reorder(labels, combinations), x = combinations))+
+    geom_col(fill = "#F4C2C2") +
+    ggthemes::theme_tufte(14) +
+    scale_x_continuous(expand = c(0,0))+
+    labs(
+        x = "Number of couples",
+        y = "",
+        title = paste0("Royal Matches Made in Heaven ",emoji("two hearts")),
+        subtitle = paste0("4 of 9 Henrys wed a Catherine", emoji("ring"),
+                          "\nwhile 3 of 11 Edwards remained without a consort",emoji("broken heart")),
+        caption = "English monarch marriage data curated by github/f.hull from Ian Visits"
+    )+
+    theme(
+        plot.title = element_text(hjust = 0.5, size = 18),
+        plot.subtitle = element_text(hjust = 0.5),
+        plot.background = element_rect(fill = "#fff4f2",
+                                       color = "white")
+    )
+```
+
+```{r}
+save_location <- here::here("products/tt_aug2024_marriage_matches.jpeg")
+ggsave(plot = matches_plot, save_location,
+       height = 5, width = 8)
+```
+
