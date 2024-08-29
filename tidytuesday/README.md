@@ -91,6 +91,19 @@ Each file has a date in its name for management purposes.
 <img src="products/tt_august1324_world_expo_themes.jpeg" width="800">
 
 
+### August 20 (Week 34)
+
+**Data:** [English Monarch Marriage Data](https://github.com/frankiethull/english_monarch_marriages)
+
+**Packages:** `dplyr`, `ggplot2`, `stringr`, `forcats`, `emoji`, `ggthemes`
+
+**Question:** What were the common couple first name combinations?
+
+**Approach:** Look at the most-recurring couple first-names across marriages.
+
+<img src="products/tt_aug2024_marriage_matches.jpeg" width="800">
+
+
 ## Contact
 
 If you have any questions or suggestions, feel free to reach out to me:
