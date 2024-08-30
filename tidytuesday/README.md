@@ -97,11 +97,13 @@ Each file has a date in its name for management purposes.
 
 **Packages:** `dplyr`, `ggplot2`, `stringr`, `forcats`, `emoji`, `ggthemes`
 
-**Question:** What were the common couple first name combinations?
+**Question:** What were the common couple first name combinations? If a royal wedding happened, who's probably getting married?
 
-**Approach:** Look at the most-recurring couple first-names across marriages.
+**Approach:** Look at the most-recurring couple first-names across marriages, and common first names of monarch and consort.
 
 <img src="products/tt_aug2024_marriage_matches.jpeg" width="800">
+
+<img src="products/tt_aug2024_marriage_common_names.jpeg" width="800">
 
 
 ## Contact

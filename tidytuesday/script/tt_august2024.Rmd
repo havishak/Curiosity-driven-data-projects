@@ -1,7 +1,7 @@
 ---
 title: "tt_august1324"
 author: "Havisha Khurana"
-date: "2024-08-16"
+date: "2024-08-29"
 output: html_document
 ---
 
@@ -16,6 +16,13 @@ library(stringr)
 library(emoji)
 library(forcats)
 library(ggthemes)
+library(ggcirclepack)
+library(showtext)
+```
+
+```{r}
+font_add_google("Great Vibes", "ab")
+showtext_auto()
 ```
 
 ```{r}
@@ -59,5 +66,127 @@ matches_plot <- english_monarchs_marriages_df %>%
 save_location <- here::here("products/tt_aug2024_marriage_matches.jpeg")
 ggsave(plot = matches_plot, save_location,
        height = 5, width = 8)
+```
+Trying another plot
+
+```{r}
+# prepare data
+monarch_names <- english_monarchs_marriages_df %>%
+    select(king_name) %>%
+    distinct() %>%
+    mutate(
+       first_name = str_extract(king_name, "^[^\\s]+")
+    ) %>%
+    group_by(first_name) %>%
+    summarize(occurence = n()) %>%
+    mutate(first_name = forcats::fct_reorder(first_name, -occurence))
+
+consort_names <- english_monarchs_marriages_df %>%
+    select(consort_name) %>%
+    distinct() %>%
+    mutate(
+       first_name = str_extract(consort_name, "^[^\\s]+")
+    ) %>%
+    group_by(first_name) %>%
+    summarize(occurence = n()) %>%
+    mutate(first_name = forcats::fct_reorder(first_name, -occurence))
+```
+
+
+```{r}
+monarch_avg_age <- round(mean(parse_number(english_monarchs_marriages_df$king_age), na.rm = T))
+monarch_text <- paste0("probably Edward, Henry, or George, aged ", monarch_avg_age)
+
+consort_avg_age <- round(mean(parse_number(english_monarchs_marriages_df$consort_age), na.rm = T))
+consort_text <- paste0("probably Anne, Catherine, or Mary, aged ", consort_avg_age)
+
+common_name_plot <- ggplot() +
+  # Monarchs
+  geom_circlepack(data = monarch_names, 
+                  aes(id = first_name, area = occurence, fill = occurence > 5),
+                  show.legend = FALSE) +
+  geom_circlepack_text(data = monarch_names,
+                       aes(id = first_name,
+                           area = occurence,
+                           label = if_else(occurence > 5, 
+                                           paste0(first_name, "\n", occurence), NA),
+                           color = occurence > 5
+                       ), 
+                       lineheight = 0.4, fontface = "bold", family = "ab",
+                       show.legend = FALSE,
+                       size = 14) +
+    
+    # Consorts
+  geom_circlepack(data = consort_names, 
+                  aes(id = first_name, area = occurence, 
+                      x = after_stat(x + 12), fill = occurence < 4),
+                  show.legend = FALSE) +
+    geom_circlepack_text(data = consort_names,
+                       aes(x = after_stat(x + 12),
+                           id = first_name,
+                           area = occurence,
+                           label = if_else(occurence > 3, 
+                                           paste0(first_name, "\n", occurence), NA),
+                           color = occurence < 4,
+                       ),
+                       family = "ab",
+                       lineheight = 0.4, fontface = "bold",
+                       size = 12,
+                       show.legend = FALSE) +
+     scale_fill_manual(values = c("#F4C2C2", "#B19CD9")) +
+     scale_color_manual(values = c("#8d4444", "#6c765b")) +
+  annotate("text", 0, -6, 
+           label = str_wrap(monarch_text, width = 25),
+           fontface = "bold",
+           family = "ab",
+           color = "#6c765b",
+           size = 12,
+           lineheight = 0.4) +
+  annotate("text", -3, 5, 
+           label = str_wrap("Monarch Common First Names", width = 15),
+           color = "#8d4444",
+           family = "ab",
+           fontface = "bold",
+           size = 12,
+            lineheight = 0.4) +
+  annotate("text", 12, -6,
+           label = str_wrap(consort_text, width = 25),
+           color = "#8d4444",
+           family = "ab",
+           fontface = "bold",
+           size = 12,
+            lineheight = 0.4) +
+  annotate("text", 16, 5, 
+           label = str_wrap("Consort Common First Names", width = 15),
+           color = "#6c765b",
+           family = "ab",
+           fontface = "bold",
+           size = 12,
+            lineheight = 0.4)+
+
+    annotate("text", 6, -6, 
+           label = "&",
+           size = 10,
+           fontface = "italic",
+           family = "ab") +
+labs(title = "Royal Marriages",
+        subtitle = "Who got married?",
+        caption = "English monarch marriage data curated by github/f.hull from Ian Visits"
+    ) +
+    theme_void(base_size = 16)+
+    ylim(-8,6)+
+    theme(
+        plot.title = element_text(hjust = 0.5, size = 50, family = "ab"),
+        plot.subtitle = element_text(hjust = 0.5, family = "ab", size = 40),
+        plot.caption = element_text(family = "ab", size = 24),
+        plot.background = element_rect(fill = "#fff4f2",
+                                       color = "white")
+    )
+
+```
+```{r}
+save_location <- here::here("products/tt_aug2024_marriage_common_names.jpeg")
+ggsave(plot = common_name_plot, save_location,
+       height = 4, width = 5)
 ```
 

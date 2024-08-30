@@ -1,0 +1,65 @@
+---
+title: "tt_august1324"
+author: "Havisha Khurana"
+date: "2024-08-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(forcats)
+library(ggthemes)
+```
+
+```{r}
+power_rangers_episodes <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-27/power_rangers_episodes.csv')
+power_rangers_seasons <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-27/power_rangers_seasons.csv')
+```
+
+
+```{r}
+spiral_initialize(xlim = c(as.numeric(as.Date("1850-01-01")), as.numeric(as.Date("2021-12-31"))), polar_lines_gp = gpar(col = "white", lty = 3))
+spiral_track(ylim = c(0, 1), background_gp = gpar(col = NA, fill = "grey90"))
+spiral_rect(
+  xleft = plot_data$start_date_num,
+  xright = plot_data$end_date_num,
+  ybottom = 0,
+  ytop = 1,
+  gp = gpar(fill = plot_data$value, col = plot_data$value)
+)
+```
+
+```{r}
+# Generate a sequence of dates
+start_date <- min(power_rangers_episodes$air_date)
+end_date <- max(power_rangers_episodes$air_date)
+dates <- seq(start_date, end_date, by = "days")
+
+# Convert dates to numeric
+date_nums <- as.numeric(dates - start_date)
+
+# Calculate spiral coordinates
+spiral_data <- tibble(
+  date = dates,
+  date_num = date_nums,
+  angle = sqrt(date_nums) * 0.1,  # Adjust spiral tightness
+  radius = sqrt(date_nums) / 10,  # Adjust spiral spread
+  x = radius * cos(angle),
+  y = radius * sin(angle)
+)
+
+# Plot the spiral
+ggplot(spiral_data, aes(x = x, y = y, color = date)) +
+  geom_point(size = 2) +
+  theme_minimal() +
+  labs(title = "Dates Organized in a Spiral", x = "X", y = "Y") +
+  theme(legend.position = "none")
+
+```
+
