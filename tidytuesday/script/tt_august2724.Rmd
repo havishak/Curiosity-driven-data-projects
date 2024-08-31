@@ -15,51 +15,79 @@ library(ggplot2)
 library(stringr)
 library(forcats)
 library(ggthemes)
+library(purrr)
+library(tidyr)
+library(tm)
 ```
 
 ```{r}
 power_rangers_episodes <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-27/power_rangers_episodes.csv')
-power_rangers_seasons <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-27/power_rangers_seasons.csv')
+# power_rangers_seasons <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-27/power_rangers_seasons.csv')
+```
+
+I want to get which characters were named in each of the episode description and then make a plot. To identify characters, I will look for words starting with capital letters.
+
+```{r}
+remove_words <- c("meanwhile", "earth", "dr", "ms", "mr", "mrs", "")
+
+character_appearance <- power_rangers_episodes %>%
+  arrange(air_date) %>%
+  mutate(seq = row_number()) %>%
+  rowwise() %>%
+  mutate(
+    words = str_split(desc, pattern = " "),
+    cap_words = reduce(words[grepl("^[A-Z]", words)], paste, sep = ";")
+  ) %>%
+  ungroup() %>%
+  separate_longer_delim(cap_words, delim = ";") %>%
+  select(season_title, episode_num, cap_words, seq) %>%
+  distinct() %>%
+  mutate(
+    cap_words = removePunctuation(cap_words),
+    cap_words = tolower(cap_words), 
+    cap_words = if_else(cap_words %in% c("ranger","power"), "rangers", cap_words)
+  ) %>%
+  filter(!cap_words %in% c(stopwords("english"), remove_words)) %>%
+  mutate(cap_words = str_to_title(cap_words),
+         cap_words = ifelse(cap_words == "TJ", "T.J.", cap_words)) %>%
+  group_by(cap_words) %>%
+  mutate(
+    occurence = n()
+    #cap_words = fct_reorder(cap_words, -occurence)
+  ) %>%
+  ungroup()
+
+season_seq <- character_appearance %>%
+  group_by(season_title) %>%
+  summarize(
+    episode_seq = min(seq)
+  ) %>%
+  arrange(episode_seq) %>%
+  mutate(season_label = row_number(),
+         seaoson_label = ifelse(season_label == 1, "Season 1", as.character(season_label)))
 ```
 
 
 ```{r}
-spiral_initialize(xlim = c(as.numeric(as.Date("1850-01-01")), as.numeric(as.Date("2021-12-31"))), polar_lines_gp = gpar(col = "white", lty = 3))
-spiral_track(ylim = c(0, 1), background_gp = gpar(col = NA, fill = "grey90"))
-spiral_rect(
-  xleft = plot_data$start_date_num,
-  xright = plot_data$end_date_num,
-  ybottom = 0,
-  ytop = 1,
-  gp = gpar(fill = plot_data$value, col = plot_data$value)
-)
+character_appearance %>%
+  filter(occurence > 10)  %>%
+  ggplot() +
+  geom_point(aes(y = fct_reorder(cap_words, occurence), x = seq, color = season_title, shape = 108),
+             show.legend = F)+
+  scale_shape_identity()+
+  scale_x_continuous(expand = c(0,0),
+                     breaks = season_seq$episode_seq,
+                     labels = season_seq$seaoson_label)+
+  scale_y_discrete(expand = c(0,0))+
+  theme_minimal()+
+  labs(
+    y = "Characters Mentioned in Episode Description",
+    x = "",
+    title = "something",
+    subtitle = "something",
+    caption = "source"
+  )+
+  theme(
+    panel.grid = element_blank()
+  )
 ```
-
-```{r}
-# Generate a sequence of dates
-start_date <- min(power_rangers_episodes$air_date)
-end_date <- max(power_rangers_episodes$air_date)
-dates <- seq(start_date, end_date, by = "days")
-
-# Convert dates to numeric
-date_nums <- as.numeric(dates - start_date)
-
-# Calculate spiral coordinates
-spiral_data <- tibble(
-  date = dates,
-  date_num = date_nums,
-  angle = sqrt(date_nums) * 0.1,  # Adjust spiral tightness
-  radius = sqrt(date_nums) / 10,  # Adjust spiral spread
-  x = radius * cos(angle),
-  y = radius * sin(angle)
-)
-
-# Plot the spiral
-ggplot(spiral_data, aes(x = x, y = y, color = date)) +
-  geom_point(size = 2) +
-  theme_minimal() +
-  labs(title = "Dates Organized in a Spiral", x = "X", y = "Y") +
-  theme(legend.position = "none")
-
-```
-
