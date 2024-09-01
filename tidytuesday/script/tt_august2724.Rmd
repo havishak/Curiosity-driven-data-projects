@@ -85,37 +85,45 @@ character_mention_plot <- character_appearance %>%
   geom_point(aes(y = fct_reorder(cap_words, occurence), x = seq, 
                  color = season_title, 
                  shape = 108,
-                 size = 3),
+                 size = 20
+                 ),
              show.legend = F)+
   scale_shape_identity()+
   scale_x_continuous(expand = c(0,0),
                      breaks = season_seq$episode_seq,
-                     labels = season_seq$seaoson_label)+
-  #scale_y_discrete(expand = c(0,0))+
+                     labels = season_seq$seaoson_label,
+                     sec.axis = dup_axis())+
+  #scale_y_discrete(sec.axis = dup_axis())+
   labs(
-    y = "Characters",
+    y = "",
     x = "",
     title = "Top Character Mentions in Power Rangers Episode Descriptions",
-    subtitle = "Rangers is the most common word, followed by Villians Rita and Zedd.",
+    subtitle = "Rangers get the most mentions across seasons,\nfollowed by lead seasonal villian, like Rita and Zedd.",
     caption = "Source: Power Rangers data curated by Nikita K.\nShowing characters with at least 15 mentions across 921 episodes; colors differentiate seasons."
   )+
   scale_color_manual(values = color_seq)+
   #theme_minimal()+
   theme(
-    text = element_text(family = "os"),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    plot.subtitle = element_text(hjust = 0.5, face = "italic"),
+    text = element_text(family = "os", color = "ivory"),
+    plot.title = element_text(hjust = 0.5, face = "bold",
+                              lineheight = 0.3, size = 32),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic",
+                                 lineheight = 0.3, size = 28),
+    plot.caption = element_text(face = "italic",
+                                 lineheight = 0.3, size = 20),
     panel.grid = element_blank(),
-    axis.text = element_text(color = "gray30"),
-    axis.ticks.y = element_blank(),
-    panel.background = element_rect(fill = "#F5F5F5"),
-    plot.background = element_rect(fill = "#F5F5F5")
+    axis.text = element_text(color = "ivory3", size = 20),
+    axis.ticks.x = element_line(color = "ivory3"),
+    panel.background = element_rect(fill = "#3A3A3A"),
+    plot.background = element_rect(fill = "#3A3A3A", color = "transparent")
+    # panel.background = element_rect(fill = "#F5F5F5"),
+    # plot.background = element_rect(fill = "#F5F5F5")
   )
 character_mention_plot
 ```
 
 ```{r}
 ggsave(here::here("products/tt_aug2724_power_rangers_character_mentions.jpeg"),
-       height = 6.5, width = 9)
+       height = 5, width = 6)
 ```
 

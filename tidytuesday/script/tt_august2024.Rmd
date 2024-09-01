@@ -18,6 +18,7 @@ library(forcats)
 library(ggthemes)
 library(ggcirclepack)
 library(showtext)
+library(readr)
 ```
 
 ```{r}
@@ -29,6 +30,8 @@ showtext_auto()
 # load data
 english_monarchs_marriages_df <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-20/english_monarchs_marriages_df.csv')
 ```
+
+
 ```{r}
 matches_plot <- english_monarchs_marriages_df %>%
     mutate(monarch_first_name = str_extract(king_name, "^[^\\s]+"),
@@ -108,7 +111,7 @@ common_name_plot <- ggplot() +
   geom_circlepack_text(data = monarch_names,
                        aes(id = first_name,
                            area = occurence,
-                           label = if_else(occurence > 5, 
+                           label = if_else(occurence > 3, 
                                            paste0(first_name, "\n", occurence), NA),
                            color = occurence > 5
                        ), 
@@ -125,7 +128,7 @@ common_name_plot <- ggplot() +
                        aes(x = after_stat(x + 12),
                            id = first_name,
                            area = occurence,
-                           label = if_else(occurence > 3, 
+                           label = if_else(occurence > 2, 
                                            paste0(first_name, "\n", occurence), NA),
                            color = occurence < 4,
                        ),
@@ -184,6 +187,7 @@ labs(title = "Royal Marriages",
     )
 
 ```
+
 ```{r}
 save_location <- here::here("products/tt_aug2024_marriage_common_names.jpeg")
 ggsave(plot = common_name_plot, save_location,
