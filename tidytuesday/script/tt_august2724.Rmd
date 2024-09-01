@@ -14,21 +14,25 @@ library(dplyr)
 library(ggplot2)
 library(stringr)
 library(forcats)
-library(ggthemes)
 library(purrr)
 library(tidyr)
 library(tm)
+library(showtext)
 ```
 
 ```{r}
 power_rangers_episodes <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-27/power_rangers_episodes.csv')
-# power_rangers_seasons <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-08-27/power_rangers_seasons.csv')
+
+font_add_google("Open Sans", "os")
+showtext_auto()
 ```
 
 I want to get which characters were named in each of the episode description and then make a plot. To identify characters, I will look for words starting with capital letters.
 
 ```{r}
-remove_words <- c("meanwhile", "earth", "dr", "ms", "mr", "mrs", "")
+remove_words <- c("meanwhile", "earth", "dr", "ms", "mr", "mrs", "",
+                  "angel", "grove", "master", "command", "spd", "spds", 
+                  "time", "org", "prince", "force", "center","can")
 
 character_appearance <- power_rangers_episodes %>%
   arrange(air_date) %>%
@@ -49,7 +53,11 @@ character_appearance <- power_rangers_episodes %>%
   ) %>%
   filter(!cap_words %in% c(stopwords("english"), remove_words)) %>%
   mutate(cap_words = str_to_title(cap_words),
-         cap_words = ifelse(cap_words == "TJ", "T.J.", cap_words)) %>%
+         cap_words = ifelse(cap_words == "TJ", "T.J.", cap_words),
+         cap_words = ifelse(cap_words %in% c("Lord","Zedd"), "Lord Zedd", cap_words),
+         cap_words = ifelse(cap_words %in% c("Dai","Shi"), "Dai Shi", cap_words),
+         cap_words = ifelse(cap_words == "Ritas", "Rita", cap_words)) %>%
+  distinct() %>%
   group_by(cap_words) %>%
   mutate(
     occurence = n()
@@ -65,29 +73,49 @@ season_seq <- character_appearance %>%
   arrange(episode_seq) %>%
   mutate(season_label = row_number(),
          seaoson_label = ifelse(season_label == 1, "Season 1", as.character(season_label)))
+
+color_seq <- rep(c(RColorBrewer::brewer.pal(8, "Pastel2"), RColorBrewer::brewer.pal(9, "Pastel1")), 2)
 ```
 
 
 ```{r}
-character_appearance %>%
-  filter(occurence > 10)  %>%
+character_mention_plot <- character_appearance %>%
+  filter(occurence > 14)  %>%
   ggplot() +
-  geom_point(aes(y = fct_reorder(cap_words, occurence), x = seq, color = season_title, shape = 108),
+  geom_point(aes(y = fct_reorder(cap_words, occurence), x = seq, 
+                 color = season_title, 
+                 shape = 108,
+                 size = 3),
              show.legend = F)+
   scale_shape_identity()+
   scale_x_continuous(expand = c(0,0),
                      breaks = season_seq$episode_seq,
                      labels = season_seq$seaoson_label)+
-  scale_y_discrete(expand = c(0,0))+
-  theme_minimal()+
+  #scale_y_discrete(expand = c(0,0))+
   labs(
-    y = "Characters Mentioned in Episode Description",
+    y = "Characters",
     x = "",
-    title = "something",
-    subtitle = "something",
-    caption = "source"
+    title = "Top Character Mentions in Power Rangers Episode Descriptions",
+    subtitle = "Rangers is the most common word, followed by Villians Rita and Zedd.",
+    caption = "Source: Power Rangers data curated by Nikita K.\nShowing characters with at least 15 mentions across 921 episodes; colors differentiate seasons."
   )+
+  scale_color_manual(values = color_seq)+
+  #theme_minimal()+
   theme(
-    panel.grid = element_blank()
+    text = element_text(family = "os"),
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic"),
+    panel.grid = element_blank(),
+    axis.text = element_text(color = "gray30"),
+    axis.ticks.y = element_blank(),
+    panel.background = element_rect(fill = "#F5F5F5"),
+    plot.background = element_rect(fill = "#F5F5F5")
   )
+character_mention_plot
 ```
+
+```{r}
+ggsave(here::here("products/tt_aug2724_power_rangers_character_mentions.jpeg"),
+       height = 6.5, width = 9)
+```
+

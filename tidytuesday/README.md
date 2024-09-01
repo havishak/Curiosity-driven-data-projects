@@ -95,7 +95,7 @@ Each file has a date in its name for management purposes.
 
 **Data:** [English Monarch Marriage Data](https://github.com/frankiethull/english_monarch_marriages)
 
-**Packages:** `dplyr`, `ggplot2`, `stringr`, `forcats`, `emoji`, `ggthemes`
+**Packages:** `dplyr`, `ggplot2`, `stringr`, `forcats`, `emoji`, `ggthemes`, `ggcirclepack`, `showtext`
 
 **Question:** What were the common couple first name combinations? If a royal wedding happened, who's probably getting married?
 
@@ -104,6 +104,20 @@ Each file has a date in its name for management purposes.
 <img src="products/tt_aug2024_marriage_matches.jpeg" width="800">
 
 <img src="products/tt_aug2024_marriage_common_names.jpeg" width="800">
+
+**Acknowledgment:** The second plot is heavily inspired from [this graphic](https://github.com/gkaramanis/tidytuesday/blob/master/2024/2024-week_32/plots/olympics-tt.png).
+
+### August 27 (Week 35)
+
+**Data:** [Power Rangers Dataset](https://www.kaggle.com/datasets/karetnikovn/power-rangers-dataset/data)
+
+**Packages:** `dplyr`, `ggplot2`, `stringr`, `forcats`, `purrr`, `tidyr`, `tm`, `showtext`
+
+**Question:** Which character names were mentioned across episode description?
+
+**Approach:** Looked for names (those starting with capital letters plus some sorting) in description.
+
+<img src="products/tt_aug2724_power_rangers_character_mentions.jpeg" width="800">
 
 
 ## Contact
