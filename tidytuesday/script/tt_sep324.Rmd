@@ -1,0 +1,183 @@
+---
+title: "tt_sep324"
+author: "Havisha Khurana"
+date: "2024-09-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(showtext)
+library(ggalluvial)
+library(forcats)
+```
+
+```{r read data}
+qname_levels_single_response_crosswalk <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-09-03/qname_levels_single_response_crosswalk.csv')
+stackoverflow_survey_questions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-09-03/stackoverflow_survey_questions.csv')
+stackoverflow_survey_single_response <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-09-03/stackoverflow_survey_single_response.csv')
+
+
+```
+
+```{r load font}
+font_add_google("Open Sans", "os")
+showtext_auto()
+```
+
+```{r relabel data}
+relabel_so <- stackoverflow_survey_single_response %>%
+  select(response_id, main_branch, dev_type, ai_threat, ai_complex) %>%
+  pivot_longer(
+    cols = -response_id,
+    names_to = "qname",
+    values_to = "level"
+  ) %>%
+  left_join(qname_levels_single_response_crosswalk) %>%
+  select(response_id, qname, label) %>%
+  pivot_wider(
+    names_from = qname,
+    values_from = label
+  ) %>%
+  # re-categorize
+  mutate(
+    # Assuming dev_type is a factor or character variable
+    dev_type = case_when(
+    dev_type %in% c("Academic researcher", "Scientist", "Research & Development role") ~ "Research & Academia",
+    dev_type %in% c("Data engineer", "Data or business analyst", "Data scientist or machine learning specialist", "Developer, AI") ~ "Data & AI",
+    dev_type %in% c("Developer, back-end", "Developer, desktop or enterprise applications", "Developer, embedded applications or devices",
+                    "Developer, front-end", "Developer, full-stack", "Developer, game or graphics",
+                    "Developer, mobile", "Developer, QA or test", "Developer, AI", "Blockchain", "Cloud infrastructure engineer") ~ "Development",
+    dev_type %in% c("DevOps specialist", "Engineer, site reliability", "System administrator", "Database administrator") ~ "DevOps & Infrastructure",
+    dev_type %in% c("Engineering manager", "Hardware Engineer", "Security professional", "Senior Executive (C-Suite, VP, etc.)") ~ "Engineering & Technical Management",
+    dev_type %in% c("Product manager", "Project manager") ~ "Product & Project Management",
+    dev_type %in% c("Designer", "Developer Experience", "Developer Advocate", "Marketing or sales professional") ~ "Design, Marketing & User Experience",
+    dev_type %in% c("Educator", "Student") ~ "Education & Training",
+    TRUE ~ "Other"
+  ),
+  main_branch = case_when(
+    main_branch %in% c("I am a developer by profession", "I used to be a developer by profession, but no longer am") ~ "Developer",
+    main_branch %in% c("I am not primarily a developer, but I write code sometimes as part of my work/studies", 
+    "I code primarily as a hobby") ~ "Occasional or Hobbyist coder",
+    main_branch == "I am learning to code" ~ "Learning to Code"
+  ),
+  main_branch = factor(main_branch, 
+                       levels = c("Developer", "Occasional or Hobbyist coder", "Learning to Code")),
+  ai_threat = if_else(ai_threat == "I'm not sure", "Unsure", ai_threat),
+  ai_complex = gsub(" at handling complex tasks", "", ai_complex),
+  ai_complex = factor(ai_complex,
+                      levels = c("Very well", "Good, but not great", "Neither good or bad", "Bad", "Very poor"))
+)
+```
+```{r}
+make_alluvial <- function(df, group_col, outcome_col){
+  
+  plot <- df %>%
+  count({{group_col}}, {{outcome_col}}) %>%
+  drop_na() %>%
+  group_by({{group_col}}) %>%
+  mutate(group_n = sum(n),
+         prop_n = n/group_n) %>% 
+  ungroup() %>%
+  mutate(across(where(is.character), ~fct_reorder(.x, prop_n))) %>%
+  ggplot() +
+  geom_alluvium(aes(axis1 = {{group_col}}, axis2 = {{outcome_col}}, y = prop_n, fill = {{outcome_col}}), 
+                width = 1/4)+
+  geom_stratum(aes(axis1 = {{group_col}}, axis2 = {{outcome_col}}, y = prop_n, fill = {{outcome_col}}), 
+               width = 1/8, alpha = 0.4) +
+  geom_label(stat = "stratum", aes(axis1 = {{group_col}}, axis2 = {{outcome_col}}, y = prop_n, label = after_stat(stratum)), 
+             size = 4, hjust = 0, nudge_x = 0.08, fill = "gray90", family = "os") +
+  # geom_text(data = description_text,
+  #           aes(x = x_pos, y = y_pos, label = labels), lineheight = 0.6, nudge_y = 2000, family = "os") +
+  labs(
+    x = "",
+    y = ""#,
+    #title = "Stack Overflow Survey Opinion: Who agrees that AI a threat to current job?"
+  )+
+  #xlim(0.9,3.3)+
+  theme(
+    text = element_text(family = "os"),
+    plot.background = element_blank(),
+    panel.background = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5)
+  )
+  
+  return(plot)
+}
+```
+
+```{r}
+make_alluvial(relabel_so, main_branch, ai_threat) +
+  scale_fill_manual(
+    values = c("Yes" = "orange3", "No" = "skyblue3", "Unsure" = "skyblue3")
+  )
+
+make_alluvial(relabel_so, dev_type, ai_threat) +
+  scale_fill_manual(
+    values = c("Yes" = "orange3", "No" = "skyblue3", "Unsure" = "skyblue3")
+  )
+
+make_alluvial(relabel_so, main_branch, ai_complex) +
+  scale_fill_manual(
+    values = c(rev(RColorBrewer::brewer.pal(5, "PuOr")))
+  )
+
+make_alluvial(relabel_so, dev_type, ai_complex) +
+  scale_fill_manual(
+    values = c(rev(RColorBrewer::brewer.pal(5, "PuOr")))
+  )
+```
+
+```{r make alluvial plot}
+description_text <- data.frame(
+  x_pos = c(1,2,3),
+  y_pos = 67000,
+  labels = c("I am ..", "I do ..",
+             "AI is a threat to\nmy current job ..")
+)
+
+relabel_so %>%
+  count(main_branch, dev_type, ai_threat) %>%
+  group_by(dev_type) %>%
+  mutate(main_n = sum(n),
+         prop_n = n/main_n) %>% 
+  ungroup() %>%
+  mutate(across(c(main_branch, ai_threat), ~fct_reorder(.x, prop_n)),
+         dev_type = fct_reorder(dev_type, n)) %>%
+  ggplot() +
+  geom_alluvium(aes(axis1 = dev_type, axis2 = main_branch, axis3 = ai_threat, y = prop_n, fill = ai_threat), width = 1/2)+
+  geom_stratum(aes(axis1 = dev_type, axis2 = main_branch, axis3 = ai_threat, y = prop_n, fill = ai_threat), width = 1/12, alpha = 0.4) +
+  geom_label(stat = "stratum", aes(axis1 = dev_type, axis2 = main_branch, axis3 = ai_threat, y = prop_n, label = after_stat(stratum)), 
+             size = 4, hjust = 0, nudge_x = 0.05, fill = "gray90", family = "os") +
+  scale_fill_manual(
+    values = c("No" = "orange3","Unsure" = "orange3","No Comments!" = "orange3", "Yes" = "skyblue3")
+    #labels = c("0" = "Don't meet criteria", "1" = "Meet criteria")
+  )+
+  # geom_text(data = description_text,
+  #           aes(x = x_pos, y = y_pos, label = labels), lineheight = 0.6, nudge_y = 2000, family = "os") +
+  labs(
+    x = "",
+    y = "",
+    title = "Stack Overflow Survey Opinion: Who agrees that AI a threat to current job?"
+  )+
+  xlim(0.9,3.3)+
+  theme(
+    text = element_text(family = "os"),
+    plot.background = element_blank(),
+    panel.background = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5)
+  )
+```
+
