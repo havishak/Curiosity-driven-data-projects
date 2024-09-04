@@ -7,6 +7,10 @@ Although I was aware of #TidyTuesday and #RStats, I hadn't tried my hand at them
 
 TidyTuesday is an amazing weekly social data project that encourages us to dive into diverse datasets and practice data wrangling, visualization, and analysis using data science tools. Each week, we get a new dataset to explore, providing endless opportunities to learn and grow.
 
+## Package Acknowledgment
+
+I use the following packages in my workflow: `tidyverse`, `janitor`, `here`, `readr`, `patchwork`, `ggrepel` and `showtext`. For each week, I include the new packages I'm trying.
+
 ## Repository Structure
 
 - **scripts/**:  Contains Rmd for analyzing the datasets and creating visualizations for each week
@@ -20,7 +24,7 @@ Each file has a date in its name for management purposes.
 
 **Data:** [The English Women's Football (EWF) Database](https://github.com/probjects/ewf-database)
 
-**Packages:** `tidyverse` and `gganimate`
+**Packages:** `gganimate`
 
 **Question:** How has the team ranking (teams with highest wins) evolve over time in the Women's Super League Tier 1?
 
@@ -36,7 +40,7 @@ Each file has a date in its name for management purposes.
 
 **Data:** [American Idol Database](https://github.com/kkakey/American_Idol)
 
-**Packages:** `tidyverse`; `ggimage`; `patchwork`; `showtext`; `ggrepel`
+**Packages:** `ggimage`
 
 **Question:** 
 1. Which artist's songs were performed by the most contestants in each season of American Idol?
@@ -52,7 +56,7 @@ Each file has a date in its name for management purposes.
 
 **Data:** [Internet Movie Database](https://github.com/rfordatascience/tidytuesday/blob/master/data/2024/2024-07-30/readme.md)
 
-**Packages:** `tidyverse`, `showtext`, `ggstream`
+**Packages:** `ggstream`
 
 **Question:** What is the distribution of genres featuring "summer" in their titles over time?
 
@@ -68,7 +72,7 @@ Each file has a date in its name for management purposes.
 
 **Data:** [Olympics Data](https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results/)
 
-**Packages:** `tidyverse`, `showtext`, `rvest`, `here`
+**Packages:**  `rvest`
 
 **Question:** How has India's journey been in the Summer Olympics?
 
@@ -82,7 +86,7 @@ Each file has a date in its name for management purposes.
 
 **Data:** [World's Fairs](https://en.wikipedia.org/wiki/World%27s_fair)
 
-**Packages:** `dplyr`, `ggplot2`, `wordcloud`, `tm`, `purr`, `grid`, `png`
+**Packages:** `wordcloud`, `tm`, `grid`, `png`
 
 **Question:** What have been the world expo themes?
 
@@ -95,7 +99,7 @@ Each file has a date in its name for management purposes.
 
 **Data:** [English Monarch Marriage Data](https://github.com/frankiethull/english_monarch_marriages)
 
-**Packages:** `dplyr`, `ggplot2`, `stringr`, `forcats`, `emoji`, `ggthemes`, `ggcirclepack`, `showtext`
+**Packages:** `emoji`, `ggcirclepack`
 
 **Question:** What were the common couple first name combinations? If a royal wedding happened, who's probably getting married?
 
@@ -111,7 +115,7 @@ Each file has a date in its name for management purposes.
 
 **Data:** [Power Rangers Dataset](https://www.kaggle.com/datasets/karetnikovn/power-rangers-dataset/data)
 
-**Packages:** `dplyr`, `ggplot2`, `stringr`, `forcats`, `purrr`, `tidyr`, `tm`, `showtext`
+**Packages:** `tm`
 
 **Question:** Which character names were mentioned across episode description?
 
@@ -119,6 +123,19 @@ Each file has a date in its name for management purposes.
 
 <img src="products/tt_aug2724_power_rangers_character_mentions.jpeg" width="800">
 
+
+### September 3 (Week 36)
+
+**Data:** [Stack Overflow Annual Package](https://www.kaggle.com/datasets/karetnikovn/power-rangers-dataset/data)
+
+**Packages:** `ggalluvial`
+
+**Question:** What do people across coding skills and industry think about AI?
+
+**Approach:** Summarized proportions by skills/industry and their thoughts on AI.
+
+<img src="products/tt_sep324_main_branch_ai.jpeg" width="800">
+<img src="products/tt_sep324_dev_type_ai.jpeg" width="800">
 
 ## Contact
 
