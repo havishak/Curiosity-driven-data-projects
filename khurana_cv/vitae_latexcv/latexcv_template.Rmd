@@ -14,7 +14,7 @@ output:
 #profilepic: image/havisha_khurana_photo.jpeg
 #aboutme: "Special Education Policy Researcher, Educator, Data Visualization Enthusiast"
 docname: "CV"
-format: cv-pdf
+aboutme: "Special Education Policy Researcher, Quantiative Methodology, Data Enthusiast, Educator \\\n \\\nMy research focuses on access, discipline, and long-term outcomes for students with disabilities and other under-served populations in the US and India."
 header-includes:
   \definecolor{headcolor}{HTML}{40E0D0}
 ---
@@ -38,9 +38,6 @@ import_data <- map(files, read_excel)
 names(import_data) <- list.files(here("data/"))
 ```
 
-# About Me
-
-<Write a parahraph>
 
 # Education
 
@@ -81,11 +78,20 @@ import_data[["cv_entries.xlsx"]] %>%
 ```{r}
 import_data[["research_projects_details.xlsx"]] %>%
   arrange(desc(year_begin)) %>%
+  group_by(year_begin, pi) %>%
+  summarize(
+    project = reduce(project, paste, sep = " & "),
+    responsibilities = reduce(responsibilities, paste, sep = "\n"),
+    description = paste(where,pi,sep = " - ")
+  ) %>%
+  distinct() %>%
+    ungroup() %>%
+  arrange(desc(year_begin))  %>%
   detailed_entries(
     what = project,
     when = year_begin,
     with = pi,
-    where = where,
+    where = description,
     why = strsplit(responsibilities,"\n")
   )
 ```
@@ -98,10 +104,13 @@ import_data[["courses_taught.xlsx"]] %>%
   mutate(
     class_type = paste0(str_to_title(mode),
                         ", ",str_to_title(level),"-Level"),
-    class_type = ifelse(!is.na(role), 
+    class_type = ifelse(!is.na(seq),
+                        paste0("Sequence of ", seq, " ", class_type, "Classes."),
+                        class_type),
+    class_type = ifelse(!is.na(role),
                         paste(class_type,role, sep = ": "),
                         class_type)
-  ) %>%
+  )  %>%
   detailed_entries(
     what = class_type,
     when = academic_year,
@@ -116,7 +125,10 @@ import_data[["courses_taught.xlsx"]] %>%
 ```{r}
 import_data[["cv_entries.xlsx"]] %>%
   filter(type == "award") %>%
-  arrange(desc(year_begin), desc(amount)) %>%
+  arrange(desc(year_begin), desc(parse_number(amount))) %>%
+  #rowwise() %>%
+  mutate(amount = scales::dollar(parse_number(amount))
+) %>%
   brief_entries(
     what = paste(what, where, sep = "- "),
     when = year_begin,
@@ -126,24 +138,23 @@ import_data[["cv_entries.xlsx"]] %>%
 
 # Presentations
 
-```{r}
-import_data[["pubs.xlsx"]] %>%
+```{r, results = "asis"}
+presentations <- import_data[["pubs.xlsx"]] %>%
   filter(type %in% c("conference", "presentation")) %>%
   mutate(
-    entry = paste0(authors, ". ", title,".", conference,"."),
-    month = gsub("(.*)(,.*)", "\\1", year)) %>%
+    entry = paste0("- ", authors, " (", year,"). ", title,". ", conference,". ", conf_loc,"."),
+    month = gsub("(.*)(,.*)", "\\1", year)
+    ) %>%
   rowwise() %>%
   mutate(
     month = which(month.name == month)
     ) %>%
   ungroup() %>%
-  arrange(desc(parse_number(year)), desc(month)) %>%
-  brief_entries(
-    what = entry,
-    when = year,
-    with = conf_loc
-  )
+  arrange(desc(parse_number(year)), desc(month))
+
+cat(unlist(presentations$entry), sep = "\\\n \\\n")
 ```
+
 
 # Training
 
@@ -152,7 +163,7 @@ import_data[["training.xlsx"]] %>%
   mutate(
     dates = ifelse(is.na(valid_upto), 
                    paste0(format(ymd(start_date), "%m/%d"), "-", format(ymd(end_date), "%m/%d"), "/", year(ymd(start_date))),
-                   paste0(format(ymd(valid_upto), "%m"), 
+                   paste0("Valid upto ", format(ymd(valid_upto), "%m"), 
                          "/", format(ymd(valid_upto), "%d"), 
                          "/", format(ymd(valid_upto), "%Y")))
   ) %>%
@@ -167,16 +178,19 @@ import_data[["training.xlsx"]] %>%
 
 # Grants
 
-```{r}
-import_data[["grants.xlsx"]] %>%
+```{r, results = "asis"}
+grant <- import_data[["grants.xlsx"]] %>%
   mutate(
     entry = ifelse(!is.na(co_pi),
     paste0(title, ". Role: ",role, " (With ", co_pi,")"),
-    paste0(title, ". "))
-    ) %>%
-  brief_entries(
-    what = entry,
-    with = funding_agency,
-    when = str_to_title(type)
-  )
+    paste0(title, ". ")),
+    entry = paste0("- ", entry, funding_agency,". (", str_to_title(type),").")
+    )
+
+cat(unlist(grant$entry), sep = "\\\n \\\n")
+  # brief_entries(
+  #   what = entry,
+  #   with = funding_agency,
+  #   when = str_to_title(type)
+  # )
 ```
