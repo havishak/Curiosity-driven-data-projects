@@ -1,0 +1,188 @@
+---
+name: Havisha
+surname: Khurana
+position: "PhD Student"
+address: "College of Education, University of Oregon"
+pronouns: she/her
+email: "havishak@uoregon.edu"
+github: havishak
+linkedin: havishak
+aboutme: "Special Education Policy Researcher, Educator, Data Enthusiast"
+date: "`r format(Sys.time(), '%B %Y')`"
+output: vitae::hyndman
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(vitae)
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(here)
+library(readr)
+library(purrr)
+library(stringr)
+library(lubridate)
+```
+
+```{r load data}
+files <- here(paste0("data/",list.files(here("data/"))))
+import_data <- map(files, read_excel)
+names(import_data) <- list.files(here("data/"))
+```
+
+# Education
+
+```{r}
+import_data[["cv_entries.xlsx"]] %>%
+  filter(type == "education") %>%
+  mutate(
+    years = paste0(year_begin,"-", parse_number(year_end)),
+  ) %>%
+  detailed_entries(
+    what = what,
+    when = years,
+    where = where,
+    why = additional_info)
+```
+
+# Employment History
+
+```{r}
+import_data[["cv_entries.xlsx"]] %>%
+  filter(type == "history") %>%
+  mutate(
+    years = case_when(
+      year_begin == year_end ~ year_begin,
+      is.na(year_end) ~ year_begin,
+      TRUE ~ paste0(year_begin,"-", parse_number(year_end)))
+  ) %>%
+  arrange(desc(year_begin)) %>%
+  detailed_entries(
+    what = what,
+    when = years,
+    where = where)
+  
+```
+
+# Researh 
+
+```{r}
+import_data[["research_projects_details.xlsx"]] %>%
+  group_by(year_begin, pi) %>%
+  summarize(
+    project = reduce(project, paste, sep = " & "),
+    responsibilities = reduce(responsibilities, paste, sep = "\n"),
+    description = paste(where,pi,sep = " - ")
+  ) %>%
+  distinct() %>%
+  ungroup() %>%
+  arrange(desc(year_begin)) %>%
+  detailed_entries(
+    what = project,
+    when = year_begin,
+    #with = pi,
+    where = description,
+    why = strsplit(responsibilities,"\n")
+  )
+```
+
+# Teaching
+
+```{r}
+import_data[["courses_taught.xlsx"]] %>%
+  arrange(desc(academic_year), title) %>%
+  mutate(
+    class_type = paste0(str_to_title(mode),
+                        ", ",str_to_title(level),"-Level"),
+    class_type = ifelse(!is.na(role), 
+                        paste(class_type,role, sep = ": "),
+                        class_type),
+    class_type = ifelse(!is.na(seq), 
+                        paste0("Sequence of ", seq, " ", class_type),
+                        class_type)
+  ) %>%
+  detailed_entries(
+    what = title,
+    when = academic_year,
+    where = class_type,
+    why = strsplit(responsibilities,"\n")
+  )
+
+```
+
+# Awards
+
+```{r}
+import_data[["cv_entries.xlsx"]] %>%
+  filter(type == "award") %>%
+  arrange(desc(year_begin), desc(parse_number(amount))) %>%
+  #rowwise() %>%
+  mutate(amount = scales::dollar(parse_number(amount))
+) %>%
+  ungroup() %>%
+  brief_entries(
+    what = paste(what, where, sep = "- "),
+    when = year_begin,
+    with = amount
+    )
+```
+
+# Presentations
+
+```{r, results = "asis"}
+presentations <- import_data[["pubs.xlsx"]] %>%
+  filter(type %in% c("conference", "presentation")) %>%
+  mutate(
+    entry = paste0("- ", authors, " (", year,"). ", title,". ", conference,". ", conf_loc,"."),
+    month = gsub("(.*)(,.*)", "\\1", year)
+    ) %>%
+  rowwise() %>%
+  mutate(
+    month = which(month.name == month)
+    ) %>%
+  ungroup() %>%
+  arrange(desc(parse_number(year)), desc(month))
+
+cat(unlist(presentations$entry), sep = "\\\n \\\n")
+```
+
+# Training
+
+```{r}
+import_data[["training.xlsx"]] %>%
+  mutate(
+    dates = ifelse(is.na(valid_upto), 
+                   paste0(format(ymd(start_date), "%m/%d"), "-", format(ymd(end_date), "%m/%d"), "/", year(ymd(start_date))),
+                   paste0("Valid upto ", format(ymd(valid_upto), "%m"), 
+                         "/", format(ymd(valid_upto), "%d"), 
+                         "/", format(ymd(valid_upto), "%Y")))
+  ) %>%
+  detailed_entries(
+    what = name,
+    when = dates,
+    where = institution,
+    why = objective
+  )
+```
+
+
+# Grants
+
+```{r, results = "asis"}
+grant <- import_data[["grants.xlsx"]] %>%
+  mutate(
+    entry = ifelse(!is.na(co_pi),
+    paste0(title, ". Role: ",role, " (With ", co_pi,")"),
+    paste0(title, ". ")),
+    entry = paste0("- ", entry, funding_agency,". (", str_to_title(type),").")
+    )
+
+cat(unlist(grant$entry), sep = "\\\n \\\n")
+  # brief_entries(
+  #   what = entry,
+  #   with = funding_agency,
+  #   when = str_to_title(type)
+  # )
+```
+
