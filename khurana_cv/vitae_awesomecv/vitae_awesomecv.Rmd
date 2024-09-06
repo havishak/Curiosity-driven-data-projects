@@ -5,18 +5,13 @@ position: "PhD Student"
 address: "College of Education, University of Oregon"
 pronouns: she/her
 email: "havishak@uoregon.edu"
-github: "github/havishak"
+github: havishak
 linkedin: havishak
+aboutme: "Special Education Policy Researcher, Educator, Data Enthusiast"
 date: "`r format(Sys.time(), '%B %Y')`"
-output: 
-  vitae::latexcv:
-    theme: classic
-#profilepic: image/havisha_khurana_photo.jpeg
-#aboutme: "Special Education Policy Researcher, Educator, Data Visualization Enthusiast"
-docname: "CV"
-format: cv-pdf
-header-includes:
-  \definecolor{headcolor}{HTML}{40E0D0}
+output:
+  vitae::awesomecv:
+    page_total: true
 ---
 
 ```{r setup, include=FALSE}
@@ -37,10 +32,6 @@ files <- here(paste0("data/",list.files(here("data/"))))
 import_data <- map(files, read_excel)
 names(import_data) <- list.files(here("data/"))
 ```
-
-# About Me
-
-<Write a parahraph>
 
 # Education
 
@@ -65,11 +56,11 @@ import_data[["cv_entries.xlsx"]] %>%
   mutate(
     years = case_when(
       year_begin == year_end ~ year_begin,
-      is.na(year_end) ~ paste0(year_begin,"-Present"),
+      is.na(year_end) ~ year_begin,
       TRUE ~ paste0(year_begin,"-", parse_number(year_end)))
   ) %>%
   arrange(desc(year_begin)) %>%
-  brief_entries(
+  detailed_entries(
     what = what,
     when = years,
     with = where)
@@ -81,11 +72,18 @@ import_data[["cv_entries.xlsx"]] %>%
 ```{r}
 import_data[["research_projects_details.xlsx"]] %>%
   arrange(desc(year_begin)) %>%
+  group_by(year_begin, pi) %>%
+  summarize(
+    project = reduce(project, paste, sep = " & "),
+    responsibilities = reduce(responsibilities, paste, sep = "\n"),
+    description = paste(where,pi,sep = " - ")
+  ) %>%
+  distinct() %>%
   detailed_entries(
     what = project,
     when = year_begin,
-    with = pi,
-    where = where,
+    #with = pi,
+    with = description,
     why = strsplit(responsibilities,"\n")
   )
 ```
@@ -152,7 +150,7 @@ import_data[["training.xlsx"]] %>%
   mutate(
     dates = ifelse(is.na(valid_upto), 
                    paste0(format(ymd(start_date), "%m/%d"), "-", format(ymd(end_date), "%m/%d"), "/", year(ymd(start_date))),
-                   paste0(format(ymd(valid_upto), "%m"), 
+                   paste0("Valid upto ", format(ymd(valid_upto), "%m"), 
                          "/", format(ymd(valid_upto), "%d"), 
                          "/", format(ymd(valid_upto), "%Y")))
   ) %>%

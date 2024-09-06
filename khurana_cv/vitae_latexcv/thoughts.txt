@@ -1,0 +1,8 @@
+Latex:
+Like the alignment
+Don't like that there is empty space for website and phone number
+Don't like that everything is in one header and bold
+AwesomeCV:
+Pretty good
+Have some problems with how conferences show up: maybe change to bib and try
+Want to change color theme
