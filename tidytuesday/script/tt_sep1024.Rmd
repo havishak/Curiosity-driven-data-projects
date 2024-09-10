@@ -1,0 +1,89 @@
+---
+title: "tt_sep10"
+output: html_document
+date: "2024-09-10"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+college_admissions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-09-10/college_admissions.csv')
+```
+
+```{r}
+uo <- college_admissions %>%
+    filter(name == "University Of Oregon")
+```
+
+```{r}
+tier_income_attend <- college_admissions %>%
+    group_by(par_income_lab, tier) %>%
+    summarize(
+        #apply = sum(apply_unwgt, na.rm = T)#,
+        #attend_wt = sum(attend), #fraction of test-takers attending the college by tier
+        attend_unwt = sum(attend_unwgt)
+    )
+
+tier_income_attend$tier <- 
+    factor(tier_income_attend$tier,
+           levels = c("Selective private", "Selective public", "Highly selective private",
+                      "Highly selective public", "Ivy Plus", "Other elite schools (public and private)"),
+           labels = c("Selective private", "Selective public", "Highly selective private",
+                      "Highly selective public", "Ivy Plus", "Other elite schools"))
+```
+
+```{r}
+plot <- ggplot(tier_income_attend,
+       aes(x = par_income_lab, y = fct_rev(tier))) +
+    geom_point(aes(fill = attend_unwt), shape = 22, size = 12.5, show.legend = F) +
+    geom_text(aes(label = round(attend_unwt*100,1),
+                  color = attend_unwt > .15),
+       show.legend = F)+
+    scale_fill_continuous(
+        type = "viridis",
+        direction = -1
+    )+
+    scale_color_manual(
+        values = c("gray10", "azure")
+    )+
+    scale_x_discrete(
+        position = "top"
+    ) +
+    labs(
+        x = "Parental Income Category",
+        y = "",
+        title = "Attendance rates across 139 US colleges",
+        subtitle = ""
+    ) +
+    coord_cartesian(clip = "off", ylim = c(1,6),
+                    xlim = c(1, 14))+
+    annotate(
+        x = 2, y = 7.5, geom = "text", label = "How to read the plot?",
+        color = "gray10"
+    ) +
+    annotate(
+        x = 2, y = 7.2, geom = "point", shape = 22,
+        size = 4, fill = "turquoise"
+    ) +
+     annotate(
+        x = 2, y = 7.2, geom = "text", label = "a",
+        size = 2, color = "azure"
+    ) +
+     annotate(
+        x = 5, y = 7.2, geom = "text", label = "a% of test-takers in the x parental-income group are in college tier y.", color = "gray10"
+    ) +
+    theme(
+        plot.background = element_blank(),
+        panel.background = element_blank(),
+        text = element_text(size = 14)
+    )
+```
+
+```{r}
+ggsave(here::here("products/tt_sep10_college_admission.jpeg"),
+       width = 9, height = 6)
+```
+
