@@ -137,6 +137,17 @@ Each file has a date in its name for management purposes.
 <img src="products/tt_sep324_main_branch_ai.jpeg" width="800">
 <img src="products/tt_sep324_dev_type_ai.jpeg" width="800">
 
+### September 10 (Week 37)
+
+**Data:** [College-Level Data for Selective American Colleges](https://opportunityinsights.org/data/)
+
+**Question:** How do college-attendance rates compare by parent income and college tier? 
+
+**Approach:** Made a heat map.
+
+<img src="products/tt_sep10_college_admission_raw.jpeg" width="800">
+<img src="products/tt_sep10_college_admission_weighted.jpeg" width="800">
+
 ## Contact
 
 If you have any questions or suggestions, feel free to reach out to me:
