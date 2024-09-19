@@ -4,6 +4,7 @@ library(syuzhet)
 library(ggrepel)
 library(showtext)
 library(ggtext)
+library(cowplot)
 
 font_add_google("Cinzel Decorative", "rnj")
 font_add_google("Baloo 2", "io")
@@ -109,7 +110,7 @@ most_emotional_dialogue <- romeo_juliet %>%
            print = str_wrap(print, 30),
            xpos = seq(3,max(romeo_juliet_circular_plot$id),
                       max(romeo_juliet_circular_plot$id) %/% 8)[1:8],
-           ypos = c(130, 167, 160, 180, 160, 150, 130, 130))
+           ypos = c(130, 173, 160, 180, 160, 165, 130, 130))
 
 
 plot <- ggplot(romeo_juliet_circular_plot, 
@@ -173,8 +174,12 @@ plot <- ggplot(romeo_juliet_circular_plot,
 
 plot
 
+final_plot <- ggdraw(plot) +
+    draw_image(here::here("images/inside_out.png"), x = 0, y = -0.07, width = 0.3, height = 0.3)
+
 ggsave("products/tt_sep1724_romeo_juliet_emotions.png", width = 9, height = 8, units = "in")
 
+# Some generative art
 abstract_art1 <- romeo_juliet %>%
     ungroup() %>%
     select(line_number, binary) %>%
@@ -187,22 +192,26 @@ abstract_art1 <- romeo_juliet %>%
     ggplot(aes(y = fct_rev(factor(index)), x = factor(line_number), fill = factor(binary))) +
     geom_raster(interpolate = TRUE,
                 show.legend = F) +
-    annotate("text", y = 1, x = 98, label = "The End.",
+    annotate("text", y = 1, x = 97, label = "The End.",
              color = "#8A0303" , family = "rnj", fontface = "italic", size = 8) +
     labs(
         title = "Presenting Romeo & Juliet",
-        subtitle = "See left to right, top to botom: Each tile represents sequential dialogue.\nColor coded each dialogue as positive (orange), negative (blue), or neutral (beige)",
+        subtitle = "See left to right, top to botom: \nColor coded each line as positive (orange), negative (blue), or neutral (beige)",
         caption = "Source: shakespeare.mit.edu via github/nrennie"
     ) +
     theme_void() +
     theme(
-        plot.title = element_text(color = "#8A0303", size = 24),
-        text = element_text(size = 14, family = "rnj"),
+        plot.title = element_text(color = "#8A0303", size = 36, hjust = 0.5),
+        plot.subtitle = element_text(size = 24, lineheight = 0.3, hjust = 0.5),
+        text = element_text(size = 24, family = "rnj"),
         plot.background = element_rect(fill = "#D8CFC4")
     ) +
     scale_fill_manual(
         values = c("#4862A3", "#D8CFC4", "#FF6700")
     )
+
+
+ggsave(plot = abstract_art1, "products/tt_sep1724_genart_1.png", width = 8, height = 4, units = "in")
 
 abstract_art2 <- romeo_juliet %>%
     ungroup() %>%
@@ -217,21 +226,23 @@ abstract_art2 <- romeo_juliet %>%
     ggplot(aes(y = fct_rev(factor(index)), x = factor(line_number), fill = factor(max_emotion))) +
     geom_raster(interpolate = TRUE,
                 show.legend = F) +
-    annotate("text", y = 1, x = 98, label = "The End.",
-             color = "#AA6FBF" , family = "io", fontface = "italic", size = 8) +
+    annotate("text", y = 1, x = 97, label = "The End.",
+             color = "#AA6FBF" , family = "io", fontface = "italic", size = 10) +
     labs(
         title = "Presenting Romeo & Juliet, Inside-Out style",
-        subtitle = "See left to right, top to botom: Each tile represents sequential dialogue.\nColor coded each dialogue as joy, sadness, anger, disgust, fear, anticipation, trust, surprise.",
+        subtitle = "See left to right, top to botom: \nColor coded each line as joy, sadness, anger, disgust, fear, anticipation, trust, surprise.",
         caption = "Source: shakespeare.mit.edu via github/nrennie"
     ) +
     theme_void() +
     theme(
-        plot.title = element_text(color = "#AA6FBF", size = 24, hjust = 0.5),
-        plot.subtitle = element_text(color = "azure", hjust = 0.5),
+        plot.title = element_text(color = "#AA6FBF", size = 36, hjust = 0.5),
+        plot.subtitle = element_text(color = "azure", hjust = 0.5, lineheight = 0.2),
         plot.caption = element_text(color = "azure"),
-        text = element_text(size = 14, family = "io"),
+        text = element_text(size = 24, family = "io"),
         plot.background = element_rect(fill = "#3C4142")
     ) +
     scale_fill_manual(
         values = extended_inside_out_colors
     )
+
+ggsave(plot = abstract_art2, "products/tt_sep1724_genart_2.png", width = 8, height = 4, units = "in")
