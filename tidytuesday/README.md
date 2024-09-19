@@ -9,7 +9,7 @@ TidyTuesday is an amazing weekly social data project that encourages us to dive 
 
 ## Package Acknowledgment
 
-I use the following packages in my workflow: `tidyverse`, `janitor`, `here`, `readr`, `patchwork`, `ggrepel` and `showtext`. For each week, I include the new packages I'm trying.
+I use the following packages in my workflow: `tidyverse`, `janitor`, `here`, `readr`, `patchwork`, `ggrepel`, `ggtext`, and `showtext`. For each week, I include the new packages I'm trying.
 
 ## Repository Structure
 
@@ -66,7 +66,7 @@ Each file has a date in its name for management purposes.
 
 **Interesting finding:** The word is common in drama and comedy genres, and started appearing in other genres around 2000s.
 
-**Acknowledgment:** I was Gilbert Fontana's visual and followed this [blogpost](https://r-graph-gallery.com/web-stacked-area-chart-inline-labels.html).
+**Acknowledgment:** Inspired by Gilbert Fontana's visual and followed this [blogpost](https://r-graph-gallery.com/web-stacked-area-chart-inline-labels.html).
 
 ### August 6 (Week 32)
 
@@ -109,7 +109,7 @@ Each file has a date in its name for management purposes.
 
 <img src="products/tt_aug2024_marriage_common_names.jpeg" width="800">
 
-**Acknowledgment:** The second plot is heavily inspired from [this graphic](https://github.com/gkaramanis/tidytuesday/blob/master/2024/2024-week_32/plots/olympics-tt.png).
+**Acknowledgment:** The second plot is heavily inspired from [this graphic](https://github.com/gkaramanis/tidytuesday/blob/master/2024/2024-week_32/plots/olympics-tt.png) by Georgios Karamanis.
 
 ### August 27 (Week 35)
 
@@ -147,6 +147,22 @@ Each file has a date in its name for management purposes.
 
 <img src="products/tt_sep10_college_admission_raw.jpeg" width="800">
 <img src="products/tt_sep10_college_admission_weighted.jpeg" width="800">
+
+### September 17 (Week 38)
+
+**Data:** [Shakespeare Dialogue](https://github.com/nrennie/shakespeare)
+
+**Packages:** `syuzhet`, `cowplot`
+
+**Question:** What emotions are reflected in the dialogues of Romeo & Juliet?
+
+**Approach:** Emotion-coded each line and visualized the emotions. Tried some generative art too.
+
+<img src="products/tt_sep1724_romeo_juliet_emotions.png" width="800">
+<img src="products/tt_sep1724_genart_1.png" width="800">
+<img src="products/tt_sep1724_genart_2.png" width="800">
+
+**Acknowledgment:** For the circular plot, I heavily relied on [this tutorial](https://r-graph-gallery.com/297-circular-barplot-with-groups.html) by R Graph Gallery.
 
 ## Contact
 
