@@ -1,125 +1,111 @@
-# Install the pdftools package
-install.packages("pdftools")
-
-# Load the pdftools package
+# Load relevant package
 library(pdftools)
-library(stringr)
-library(tidyr)
+library(tidyverse)
 
-# Step 1 - get citations
-# Step 2 - get bibtex: from google scholar or doi to bibtext converter?
-# ISBN, DOI, PMID, arXiv, or ADS
+# this function converts a pdf_path to pdf_text
+# combines all pages
+# and breaks each part starting with a new line into its own object
+# returns a character vector
 
-b2b_results_url <- "https://search.worldcat.org"
-
-# see rules for scraping on the page and other bots information
-results_session <- bow(b2b_results_url,
-                       user_agent = "HK result scraping",
-                       force = TRUE)
-
-results_session # we have the permission to scrape!
-
-# Idea - get DOIs which can then me imported in Zotero. Other's can't be but you can get a list of citations
-
-# Specify the path to your PDF file
-pdf_path <- "C:/SDXC/University of Oregon Dropbox/Havi Khurana/Courses/2023_03_Spring/EDLD 631 Multilingual students/syllabus.pdf"
-
-# Extract text from the PDF
-pdf_text_content <- pdf_text(pdf_path)
-
-# Combine all pages into a single text
-all_text <- paste(pdf_text_content, collapse = "\n")
-
-# Print the combined text
-cat(all_text)
-
-
-lines <- unlist(strsplit(all_text, "\n\n"))
-
-
-# Define a regular expression pattern for APA citations
-# This pattern matches common APA citation formats
-citation_identifier <- "\\(\\d{4}[a-z]?\\)"
-
-# Find all matches in the text
-citations <- lines[stringr::str_detect(lines, citation_pattern)]
-
-citations <- gsub(pattern = "\\s{2,}", "", citations)
-citations <- gsub(pattern = "\n", " ", citations)
-
-# Define a regular expression pattern for DOIs
-doi_pattern <- "\\b10\\.[0-9]{4,}(?:\\.[0-9]+)*/[^\\s]+\\b"
-
-# Find all matches in the text
-dois <- stringr::str_extract_all(all_text, doi_pattern)
-
-# Flatten the list of matches into a single vector
-dois <- unlist(dois)
-
-# Print the extracted DOIs
-print(dois)
-
-citation_doi  <- stringr::str_detect(citations, doi_pattern)
-
-citation_df <- tibble(
-    citations = citations,
-    doi_found = citation_doi,
-    doi = ifelse(doi_found == TRUE, 
-                 str_extract(citations, doi_pattern), NA))
-citation <- citation_df$citations[3]
-
-author <- gsub("\\s*\\(\\d{4}\\).*", "", citation)
-author <- gsub(" & ","", author)
-# new name is after the even comma
-
-
-# Add DOIs separated by comma
-# For some reasons, it isn't able to find pdfs to download when entering DOI - check adn see.
-
-
-library(stringr)
-
-# Sample APA citations
-citations <- c(
-    "Smith, J. A. & Khurana, H. (2020). The study of something important. *Journal of Important Studies*, 10(2), 123-145. https://doi.org/10.1234/abcd.efghij",
-    "Doe, J., & Roe, R. (2019). Another groundbreaking research. *Science Journal*, 15(3), 234-256. https://doi.org/10.5678/wxyz.abcd"
-)
-
-# Function to extract citation details
-extract_citation_details <- function(citation) {
-    # Regular expressions to extract different parts of the citation
-    author_pattern <- "^([A-Za-z,\\. ]+)"
-    year_pattern <- "\\((\\d{4})\\)"
-    title_pattern <- "\\)\\. ([^\\.]+)\\. \\*([^\\*]+)\\*"
-    journal_pattern <- "\\*([^\\*]+)\\*"
-    doi_pattern <- "https://doi\\.org/([\\w\\./]+)"
+pdf_to_text <- function(pdf_path){
+    # Extract text from the PDF
+    pdf_text_content <- pdf_text(pdf_path)
     
-    # Extracting details
-    authors <- str_extract(citation, author_pattern)
-    year <- str_extract(citation, year_pattern)
-    year <- str_replace(year, "[()]", "") # Remove parentheses
-    title <- str_extract(citation, title_pattern)
-    title <- str_replace(title, "\\. \\*.*", "") # Remove journal part
-    journal <- str_extract(citation, journal_pattern)
-    doi <- str_extract(citation, doi_pattern)
+    # Combine all pages into a single text
+    all_text <- paste(pdf_text_content, collapse = "\n")
     
-    # Return as a named list
-    list(
-        Authors = authors,
-        Year = year,
-        Title = title,
-        Journal = journal,
-        DOI = doi
-    )
+    all_paragraphs <- unlist(strsplit(all_text, "\n\n"))
+    
+    return(all_paragraphs)
 }
 
-# Apply the function to each citation
-citation_details <- lapply(citations, extract_citation_details)
 
-# Convert the list to a data frame
-citation_df <- do.call(rbind, lapply(citation_details, as.data.frame))
-rownames(citation_df) <- NULL
+# this function finds all dois in the pdf
+journal_doi <- function(pdf_path){
+    
+    # get text
+    pdf_text <- pdf_to_text(pdf_path)
+    
+    # define doi pattern
+    doi_pattern <- "\\b10\\.[0-9]{4,}(?:\\.[0-9]+)*/[^\\s]+\\b"
+    
+    # find doi in pdf text
+    doi_found <-str_extract_all(pdf_text, doi_pattern) %>%
+        unlist()
+    
+    return(doi_found)
+}
 
-# Print the result
-print(citation_df)
+# this function finds some of the common pre-print identifiers in the pdf
+preprint_id <- function(pdf_path){
+    
+    # get text
+    pdf_text <- pdf_to_text(pdf_path)
+    
+    # dictionary for common preprint indentifier starters
+    # add more per need
+    
+    pre_print_pattern <- c(
+        "arXiv" = "arXiv:([0-9]{4}\\.[0-9]{5})(v[0-9]+)?", # arXiv pattern
+        "ssrn" = "SSRN:[0-9]+",                                   # SSRN pattern
+        "repec" = "RePEc:[a-z]+:[a-z]+:[0-9]+",                    # RePEc pattern
+        "starts_with_10" = "10\\.\\d{4,9}/[-._;()/:A-Z0-9]+"       
+    )
+    
+    # find doi in pdf text
+    id_found <-str_extract_all(pdf_text, 
+                    reduce(pre_print_pattern, paste, sep = "|")) %>%
+        unlist()
+    
+    return(id_found)
+}
 
+# choose citation pattern
+# reading excel there are additional backslashes throughout
+get_citation_pattern <- function(citation_style){
+    
+    # citation styles in Zotero and their format
+    all_citation_styles <- readxl::read_excel("citation_styles/journal_citation_styles.xlsx")
+    
+    chosen_citation_styles <- all_citation_styles %>%
+        filter(style == citation_style)
+    
+    if(nrow(chosen_citation_styles) == 0)
+        print("Citation style not found in meta data")
+        return(NA)
+    
+    citation_pattern <- chosen_citation_styles$regex_extraction_format
+    citation_year_pattern <- chosen_citation_styles$year_format
+    
+    return(list(citation_year_pattern, citation_pattern))
+}
+
+# get meta data from citations
+
+citation_metadata <- function(pdf_path, citation_style){
+    
+    # get citation pattern  
+    citation_pattern <- get_citation_pattern(citation_style)
+    
+    # get pdf
+    pdf_text <- pdf_to_text(pdf_path)
+    
+    # flag lines which have the year pattern as in citation styles
+    citation_text <- str_extract_all(pdf_text, pattern = citation_pattern[[1]])
+    
+    # additional test: length should be smaller than 400 characters
+    citation_text <- citation_text[str_length(citation_text) < 400]
+    
+    citation_parts <- str_match_all(citation_text,
+                                    pattern = citation_pattern[[2]])
+    
+    return(citation_parts)
+}
+
+# pdf_path
+pdf_text_content <- here::here("test_files/multilingual_syllabus.pdf")
+preprint_id(pdf_text_content)
+
+citation_style <- "American Psychological Association 7th edition"
+
+get_citation_pattern(citation_style)
