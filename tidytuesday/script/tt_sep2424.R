@@ -1,7 +1,6 @@
 library(tidyverse)
 #library(camcorder)
 library(showtext)
-library(ggtext)
 library(ggridges)
 library(patchwork)
 

@@ -164,6 +164,21 @@ Each file has a date in its name for management purposes.
 
 **Acknowledgment:** For the circular plot, I heavily relied on [this tutorial](https://r-graph-gallery.com/297-circular-barplot-with-groups.html) by R Graph Gallery.
 
+### September 24 (Week 39)
+
+**Data:** [International Mathematical Olympiad Data](https://github.com/rfordatascience/tidytuesday/blob/master/data/2024/2024-09-24/readme.md)
+I helped curate this data!
+
+**Packages:** `ggridges`
+
+**Question:** What problems are key to winning a medal?
+
+**Approach:** Density plots by medal status
+
+<img src="products/tt_sep2424_scores_distribution.png" width="800">
+
+**Acknowledgment:** For the density plot, I was inspired by [this plot](https://r-graph-gallery.com/web-ridgeline-plot-with-inside-plot-and-annotations.html) by Ansar Wolsing, especially the internal legend.
+
 ## Contact
 
 If you have any questions or suggestions, feel free to reach out to me:
