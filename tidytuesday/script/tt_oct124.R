@@ -110,9 +110,61 @@ updated_positions <- map(plot_chess_opening$first_four, chessboard_after_four)
 plots <- map2(updated_positions, 1:top_n, ~chessboard_ggplot(.x, 
                                                              plot_chess_opening[.y,]))
 
+# legend plot
+legend_plot <-  ggplot() +
+    annotate(geom = "linerange", xmin = 0.5,
+             xmax = 0.5 + 8, y =0, linewidth = 3, color = "#8B4513")+
+    annotate(geom = "linerange", xmin = 0.5,
+             xmax = (0.5 + 8*plot_chess_opening$prob_white[1] + 8*plot_chess_opening$prob_draw[1]), 
+             y =0, linewidth = 3, color = "gray80") +
+    annotate(geom = "linerange", xmin = 0.5,
+             xmax = (0.5 + 8*plot_chess_opening$prob_white[1]), y =0, linewidth = 3, color = "#D2B48C") +
+    # labs(
+    #     title = "Legend"
+    # ) +
+    annotate(geom = "point", x = 4.5,
+             y = 0, color = "darkred", shape = "|", size = 4) +
+    # annotate(geom = "text", x = 1, y = 0,
+    #          label ="w%",
+    #          color = "#8B4513",family = "DejaVu Sans",
+    #          size = 2, fontface = "bold") +
+    # annotate(geom = "text", x = 8, y = 0,
+    #          label = "b%",
+    #          color = "#D2B48C",family = "DejaVu Sans", size = 2.5, fontface = "bold") +
+    annotate(geom = "text", x = 0, y = 0,
+             label = "% games won\nby White", 
+             color = "#8B4513",family = "DejaVu Sans", size = 2.5, fontface = "bold") +
+    annotate(geom = "text", x = 3.5, y = -0.01,
+             label = "% draw",
+             color = "gray15",family = "DejaVu Sans", size = 2.5, fontface = "bold") +
+    annotate(geom = "text", x = 9.2, y = 0,
+             label = "% won by\nBlack",
+             color = "#8B4513",family = "DejaVu Sans", size = 2.5, fontface = "bold") +
+    geom_curve(
+        data = data.frame(
+            x = c(0.1, 3.5, 9),
+            y = c(0, -0.01, 0),
+            xend = c(1,3.6,8) , 
+            yend = c(0,0,0)),
+        aes(x = x, xend = xend, y = y, yend = yend),
+        stat = "unique", curvature = 0.2, size = 0.2, color = "grey12",
+        arrow = arrow(angle = 20, length = unit(1, "mm"))
+    ) +
+    ylim(c(-0.015, 0.01))+
+    xlim(c(-1,9.5))
+    # theme(
+    #     # plot.title = element_text(family = "DejaVu Sans",
+    #     #                           face = "bold",
+    #     #                           size = 10, hjust = 0.5),
+    #     #plot.background = element_rect(fill = "#fcf7ec", color = NA)
+    # )
+
 combined_plot <- wrap_plots(plots, nrow = 3) +
-    plot_annotation(title = "Chessboard Configurations After the First Four Moves",
-                    subtitle = "Number represents the proportion of games won by White or Black based on common opening move patterns.\nRed shows the 50-50% line.",
+    inset_element(legend_plot, l = -0.5, r = 0.9,  t = 3.73, b = 3.48,
+                  align_to = "plot",
+                  clip = F) +
+    plot_annotation(title = "Top 15 Chessboard Configurations After the First Four Moves",
+                    subtitle = "Some openings favor White, others Black\nVan't Kruijs sees Black win 61%, while Philidor Defense #3 gives White a 64% win rate.",
                     caption = "Source: Lichess.org via Kaggle/Mitchell J.") &
     theme(
         plot.title = element_text(family = "DejaVu Sans",
@@ -122,6 +174,9 @@ combined_plot <- wrap_plots(plots, nrow = 3) +
         plot.caption = element_text(family = "DejaVu Sans",
                                   face = "italic"),
         plot.background = element_rect(fill = "#fcf7ec", color = NA)
-    )
+    ) 
 
-ggsave("products/tt_oct124_chessopening.png", width = 12, height = 8)
+
+
+
+ggsave("products/tt_oct124_chessopening.png", width = 13, height = 9)
