@@ -181,6 +181,20 @@ Each file has a date in its name for management purposes.
 
 **Acknowledgment:** For the density plot, I was inspired by [this plot](https://r-graph-gallery.com/web-ridgeline-plot-with-inside-plot-and-annotations.html) by Ansar Wolsing, especially the internal legend.
 
+### October 1 (Week 40)
+
+**Data:** [Lichesss Data via Kaggle/Mitchell J](https://www.kaggle.com/datasets/datasnaek/chess/data)
+
+**Packages:** `rchesss`
+
+**Question:** What are some coommon opening moves in chesss game, and which side has a higher win chance with a given opening move?
+
+**Approach:** Dispayed chessboard configuration for top 15 most common opening with percentage wins
+
+<img src="products/tt_oct124_chessopening.png" width="800">
+
+**Acknowledgment:** I learned about plotting chess data using the this [post](https://jkunst.com/blog/posts/2015-10-30-visualizing-chess-data-with-ggplot/) by Joshua Kunst Fuentes.
+
 ## Contact
 
 If you have any questions or suggestions, feel free to reach out to me:
