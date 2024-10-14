@@ -114,7 +114,7 @@ ggraph(mygraph, layout = 'dendrogram', circular = TRUE) +
   geom_node_point(aes(filter = leaf, x = x*1.07, y=y*1.07), 
                   color = "#d0bca2", size = 6, alpha=0.6, show.legend = FALSE)  +
   geom_node_text(aes(x = x*1.15, y=y*1.15, filter = leaf, label=name), size=7, color = "#3b342b", alpha=1, show.legend = FALSE, repel = TRUE, family = "oswald",max.overlaps = 200) +
-  geom_node_text(aes(x = x*1.5, y=y*1.5, filter = leaf, label=group_name), color = "#324831", size=8, alpha=1, show.legend = FALSE, repel = TRUE, family = "oswald",max.overlaps = 200) +
+  geom_node_text(aes(x = x*1.4, y=y*1.4, filter = leaf, label=group_name), color = "#324831", size=8, alpha=1, show.legend = FALSE, repel = TRUE, family = "oswald",max.overlaps = 200) +
 
   scale_edge_alpha(
     range = c(0.05, 0.18),
@@ -122,23 +122,24 @@ ggraph(mygraph, layout = 'dendrogram', circular = TRUE) +
     guide = "none") +
   labs(
     title = "Biodiversity Patterns in 15 US National Parks",
-    subtitle = "This visual highlights the top 15 species in each park. Each node represents the species order and green labels show the beginning of a species category.\nOpacity indicates each species' proportion within the park's ecosystem.",
+    subtitle = "This visual highlights the top 15 species in each park. Each node represents the species order and green labels show the\nbeginning of a species category.Opacity indicates each species' proportion within the park's ecosystem.",
     caption = "Source: National Park Species via github/frankiethull"
   ) +
   theme_void(32) +
   theme(
-    #legend.position="bottom",
+    legend.position="bottom",
     plot.margin=unit(c(0,0,0,0),"cm"),
-    plot.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "gray90", color = NA),
     text = element_text(family = "oswald", color = "gray40"),
     plot.subtitle = element_text(lineheight = 0.3),
     legend.text = element_text(size = 20),
-    legend.spacing.y = unit(0.01, 'cm'),
-    legend.spacing.x = unit(0.01, 'cm')
+    legend.key.spacing = unit(0.01, 'cm')
+    # legend.spacing.y = unit(0.01, 'cm'),
+    # legend.spacing.x = unit(0.01, 'cm')
   ) +
   expand_limits(x = c(-1.3, 1.3), y = c(-1.3, 1.3))
 
 
-ggsave("products/tt_oct0824_ecology.png", width = 8, height = 5)
+ggsave("products/tt_oct0824_ecology.png", width = 6.5, height = 6.5)
 
  
