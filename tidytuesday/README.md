@@ -187,13 +187,27 @@ Each file has a date in its name for management purposes.
 
 **Packages:** `rchesss`
 
-**Question:** What are some coommon opening moves in chesss game, and which side has a higher win chance with a given opening move?
+**Question:** What are some commmon opening moves in chesss game, and which side has a higher win chance with a given opening move?
 
-**Approach:** Dispayed chessboard configuration for top 15 most common opening with percentage wins
+**Approach:** Displayed chessboard configuration for top 15 most common opening with percentage wins
 
 <img src="products/tt_oct124_chessopening.png" width="800">
 
-**Acknowledgment:** I learned about plotting chess data using the this [post](https://jkunst.com/blog/posts/2015-10-30-visualizing-chess-data-with-ggplot/) by Joshua Kunst Fuentes.
+**Acknowledgment:** I learned about plotting chess data using this [post](https://jkunst.com/blog/posts/2015-10-30-visualizing-chess-data-with-ggplot/) by Joshua Kunst Fuentes.
+
+### October 8 (Week 41)
+
+**Data:** [National Park Species](National Park Species)
+
+**Packages:** `ggraph`
+
+**Question:** What are some ecological patterns across 15 national parks?
+
+**Approach:** Used a circular edge bundling plot to see species coexistant patterns.
+
+<img src="products/tt_oct0824_ecology.png" width="800">
+
+**Acknowledgment:** I followed this [post](https://r-graph-gallery.com/311-add-labels-to-hierarchical-edge-bundling.html) to understand hierarchical edge bundling plot.
 
 ## Contact
 
