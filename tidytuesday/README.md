@@ -197,7 +197,7 @@ Each file has a date in its name for management purposes.
 
 ### October 8 (Week 41)
 
-**Data:** [National Park Species](National Park Species)
+**Data:** [National Park Species]()
 
 **Packages:** `ggraph`
 
@@ -208,6 +208,21 @@ Each file has a date in its name for management purposes.
 <img src="products/tt_oct0824_ecology.png" width="800">
 
 **Acknowledgment:** I followed this [post](https://r-graph-gallery.com/311-add-labels-to-hierarchical-edge-bundling.html) to understand hierarchical edge bundling plot.
+
+
+### October 15 (Week 42)
+
+**Data:** [Orcas Encounter Data]()
+
+**Packages:** `sf` and `rnaturalearth`
+
+**Question:** What are the monthly orca encounter trends?
+
+**Approach:** Plotted month-wise paths on map around the Salish Sea highlighting the longest encounter.
+
+<img src="products/tt_oct1524_orca.jpeg" width="800">
+
+
 
 ## Contact
 
