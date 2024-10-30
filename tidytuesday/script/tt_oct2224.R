@@ -74,7 +74,7 @@ ggplot(plot_df) +
     geom_point(aes(x=longitude, y=latitude, size=internet_per, color=internet_per, alpha=internet_per),
                shape=20, stroke=FALSE) +
     ggrepel::geom_text_repel(aes(x=longitude, y=latitude, label = text_label),
-               size = 2.5, max.overlap = 20, color = "gray30", family = "Helvetica",
+               size = 2.5, max.overlaps = 20, color = "gray30", family = "Helvetica",
                lineheight = 0.8) +
     scale_size_continuous(name='% Population\nUsing Internet',
                           range=c(3,8), breaks= c(1, 10, 25, 50, 90)) +
