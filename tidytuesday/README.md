@@ -223,6 +223,18 @@ Each file has a date in its name for management purposes.
 <img src="products/tt_oct1524_orca.jpeg" width="800">
 
 
+### October 22 (Week 43)
+
+**Data:** [CIA Factbook 2014]()
+
+**Packages:** `sf`, `rnaturalearth`, `stringdist`
+
+**Question:** What percent of a country's population were internet users in 2014?
+
+**Approach:** Bubble map and some fuzzy-matching
+
+<img src="products/tt_oct2224_ciadata.png" width="800">
+
 
 ## Contact
 
