@@ -235,6 +235,16 @@ Each file has a date in its name for management purposes.
 
 <img src="products/tt_oct2224_ciadata.png" width="800">
 
+### October 29 (Week 44)
+
+**Data:** [IMBD Halloween Movies]()
+
+**Packages:** `ggbeeswarm`
+
+**Approach:** Some halloween-inspired pumpkin and ghost distributions
+
+<img src="products/tt_oct2924_halloween.png" width="800">
+<img src="products/tt_oct2924_ghost.png" width="800">
 
 ## Contact
 
