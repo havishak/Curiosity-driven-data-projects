@@ -246,6 +246,20 @@ Each file has a date in its name for management purposes.
 <img src="products/tt_oct2924_halloween.png" width="800">
 <img src="products/tt_oct2924_ghost.png" width="800">
 
+### November 4 (Week 45)
+
+**Data:** [Democracy data]()
+
+**Packages:** ggsankey
+
+**Question:** How has world electoral systems changed over time?
+
+**Approach:** Make a sankey plot showing 4 classification of electoral system over time.
+
+<img src="products/tt_nov4_electoral.jpeg" width="800">
+
+**Acknowledgement:** I was inspired by this [plot](https://github.com/gkaramanis/tidytuesday/tree/master/2024/2024-week_31) from [Georgios Karamanis](https://github.com/gkaramanis) and re-purposed some of the code.
+
 ## Contact
 
 If you have any questions or suggestions, feel free to reach out to me:
