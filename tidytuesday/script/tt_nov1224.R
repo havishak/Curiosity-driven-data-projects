@@ -156,7 +156,7 @@ all_tables <- pmap(list(df_list,
      ~get_gt_table(..1, ..2,..3))
 
 tables_tib <- tibble(
-  level = c("Changed Country Name", "Country Splitted", "Countried Merged", "Became a Subdivision","Reason Unclear"),
+  level = c("Changed Country Name", "Country Splitted", "Country Merged", "Became a Subdivision","Reason Unclear"),
   table = map_chr(all_tables, as_raw_html)
 ) |>
   pivot_wider(names_from = level, values_from = table)
@@ -203,8 +203,8 @@ former_country_table <- tables_tib |>
       cell_text(color = 'gray30', weight = 'bold')
     ),
     locations = list(
-      cells_body(columns = 'Countried Merged', rows = 1),
-      cells_column_labels(column = 'Countried Merged')
+      cells_body(columns = 'Country Merged', rows = 1),
+      cells_column_labels(column = 'Country Merged')
     )
   ) |> 
   tab_style(

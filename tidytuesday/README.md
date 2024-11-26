@@ -260,6 +260,23 @@ Each file has a date in its name for management purposes.
 
 **Acknowledgement:** I was inspired by this [plot](https://github.com/gkaramanis/tidytuesday/tree/master/2024/2024-week_31) from [Georgios Karamanis](https://github.com/gkaramanis) and re-purposed some of the code.
 
+
+### November 11 (Week 46)
+
+**Data:** [ISO Country Code]()
+
+**Packages:** gt
+
+**Question:** Why was the country code for some countried retracted?
+
+**Approach:** Made a table by reason for former code.
+
+You can view the table by clicking [here](products/tt_nov11_isocode.html).
+
+<img src="products/tt_nov11_isocode.png" width="800">
+
+**Acknowledgement:** Followed this great tutorial by [Albert Rapp](https://gt.albert-rapp.de/).
+
 ## Contact
 
 If you have any questions or suggestions, feel free to reach out to me:
