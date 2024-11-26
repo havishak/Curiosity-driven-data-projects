@@ -271,9 +271,9 @@ Each file has a date in its name for management purposes.
 
 **Approach:** Made a table by reason for former code.
 
-You can view the table by clicking [here](products/tt_nov11_isocode.html).
+You can view the table by downloading the file [here](products/tt_nov11_isocode.html).
 
-<img src="products/tt_nov11_isocode.png" width="800">
+<img src="products/tt_nov11_isocode.png">
 
 **Acknowledgement:** Followed this great tutorial by [Albert Rapp](https://gt.albert-rapp.de/).
 
