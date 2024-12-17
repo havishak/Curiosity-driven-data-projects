@@ -275,7 +275,7 @@ You can view the table by downloading the file [here](products/tt_nov11_isocode.
 
 <img src="products/tt_nov11_isocode.png">
 
-<img src="products/tt_nov1124_countrycodes.png" width = "800">
+<img src="products/tt_nov1124_country_codes.png" width = "800">
 
 **Acknowledgement:** Followed this great tutorial by [Albert Rapp](https://gt.albert-rapp.de/).
 
