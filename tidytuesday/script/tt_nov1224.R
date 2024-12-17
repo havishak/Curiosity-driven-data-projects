@@ -1,6 +1,8 @@
 library(tidyverse)
 library(gt)
 library(gtExtras)
+library(ggcirclepack)
+library(grid)
 
 countries <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-11-12/countries.csv')
 country_subdivisions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-11-12/country_subdivisions.csv')
@@ -149,7 +151,9 @@ table_panel_colors <- RColorBrewer::brewer.pal(5, "Pastel1")
 # get table in one
 
 df_list <- list(same_numeric, split, merged, same_name, unaccounted)
-names(df_list) <- c("same_name", "split", "merged", "part", "na")
+names(df_list) <- c("Changed Country Name", "Country Splitted",
+                    "Country Merged", "Became a Subdivision","Reason Unclear")
+
 all_tables <- pmap(list(df_list, 
      table_panel_colors,
      names(df_list)),
@@ -260,3 +264,68 @@ former_country_table <- tables_tib |>
   ) 
 
 former_country_table
+
+# Make a circle plot using ggcirclepack
+
+# make data
+merged_df <- map2_dfr(df_list, 1:length(df_list), ~.x |>
+                          mutate(category = names(df_list)[.y])) |>
+    janitor::clean_names() |>
+    mutate(former_name = ifelse(is.na(former_name), name, former_name),
+           n = 1) 
+
+category_df <- merged_df |>
+    count(category) |>
+    mutate(former_name = category)
+
+category_merged_df <- merged_df |>
+    bind_rows(category_df) |>
+    mutate(
+        label = ifelse(!is.na(date_withdrawn),
+                       paste(str_wrap(former_name,10), date_withdrawn, sep = "\n"),
+                       paste(str_wrap(former_name,10), n, sep = "\n")
+        )
+    )
+
+plot <- ggplot() +
+    geom_circlepack(data = category_merged_df, 
+                    aes(id = former_name, 
+                        fill = category,
+                        area = n),
+                    show.legend = FALSE) +
+    geom_circlepack_text(data = category_merged_df,
+                         aes(id = former_name,
+                             area = n,
+                             label = label,
+                             size = is.na(date_withdrawn),
+                             color = is.na(date_withdrawn)
+                         ),
+                         lineheight = 0.8,
+                         fontface = "bold",
+                         show.legend = FALSE) +
+    scale_color_manual(values = c("gray50", "gray30")) +
+    scale_size_manual(values = c(5, 10)) +
+    scale_fill_manual(values = RColorBrewer::brewer.pal(5, "Pastel1"))+
+    facet_wrap(~category, scales = "free") + 
+    labs(caption = "Source: ISO Country Code, #TidyTuesday")+
+    theme_minimal(30) +
+    theme(
+        strip.text = element_blank(),
+        axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(fill = "gray90", color = "transparent"),
+        plot.background = element_rect(fill = "gray90", color = "transparent")
+    ) 
+
+
+grid.newpage()  # Start a new drawing page
+grid.draw(ggplotGrob(plot))  # Draw the saved ggplot object
+
+# Place the custom text
+grid.text(str_wrap("The Case of Former Countries: 
+                   An analysis of 31 nations that no longer hold an ISO country code, revealing that changes in country names are the most common contributing factor.", 22),
+          x = 0.8, y = 0.3,  # Position (normalized coordinates: 0 to 1)
+          gp = gpar(fontsize = 36, fontface = "bold", col = "gray20", lineheight = 0.9))
+
+dev.print(png, filename = "products/tt_nov1124_country_codes.png", width = 1400, height = 1000)
+dev.off()
