@@ -197,7 +197,7 @@ Each file has a date in its name for management purposes.
 
 ### October 8 (Week 41)
 
-**Data:** [National Park Species]()
+**Data:** [National Park Species](https://irma.nps.gov/npspecies/)
 
 **Packages:** `ggraph`
 
@@ -212,7 +212,7 @@ Each file has a date in its name for management purposes.
 
 ### October 15 (Week 42)
 
-**Data:** [Orcas Encounter Data]()
+**Data:** [Orcas Encounter Data](https://www.whaleresearch.com/)
 
 **Packages:** `sf` and `rnaturalearth`
 
@@ -225,7 +225,7 @@ Each file has a date in its name for management purposes.
 
 ### October 22 (Week 43)
 
-**Data:** [CIA Factbook 2014]()
+**Data:** [CIA Factbook 2014](https://cran.r-project.org/package=usdatasets)
 
 **Packages:** `sf`, `rnaturalearth`, `stringdist`
 
@@ -237,7 +237,7 @@ Each file has a date in its name for management purposes.
 
 ### October 29 (Week 44)
 
-**Data:** [IMBD Halloween Movies]()
+**Data:** [IMBD Halloween Movies](https://developer.imdb.com/non-commercial-datasets/)
 
 **Packages:** `ggbeeswarm`
 
@@ -248,9 +248,9 @@ Each file has a date in its name for management purposes.
 
 ### November 4 (Week 45)
 
-**Data:** [Democracy data]()
+**Data:** [Democracy data](https://xmarquez.github.io/democracyData/index.html)
 
-**Packages:** ggsankey
+**Packages:** `ggsankey`
 
 **Question:** How has world electoral systems changed over time?
 
@@ -263,19 +263,36 @@ Each file has a date in its name for management purposes.
 
 ### November 11 (Week 46)
 
-**Data:** [ISO Country Code]()
+**Data:** [ISO Country Code](https://cran.r-project.org/package=ISOcodes)
 
-**Packages:** gt
+**Packages:** `gt`, `ggcirclepack`, `grid`
 
-**Question:** Why was the country code for some countried retracted?
+**Question:** Why was the country code for some countries retracted?
 
-**Approach:** Made a table by reason for former code.
+**Approach:** Made a table by reason for former code. Also made a bubble chart to showcase the same information.
 
 You can view the table by downloading the file [here](products/tt_nov11_isocode.html).
 
 <img src="products/tt_nov11_isocode.png">
 
+<img src="products/tt_nov1124_countrycodes.png" width = "800">
+
 **Acknowledgement:** Followed this great tutorial by [Albert Rapp](https://gt.albert-rapp.de/).
+
+### November 19 (Week 47)
+
+**Data:** [Bob's Burgers Episodes](https://github.com/poncest/bobsburgersR)
+
+**Packages:** `ggbeeswarm`
+
+**Question:** How do all episode metrics compare across different quantiles formed by the distribution of those specific metrics?
+
+**Approach:** Assigned quantiles and used beeswarm plots.
+
+<img src="products/tt_nov1924_unique_words.png" width = "800">
+<img src="products/tt_nov1924_avg_length.png" width = "800">
+<img src="products/tt_nov1924_dialogue_density.png" width = "800">
+<img src="products/tt_nov1924_sentiment_variance.png" width = "800">
 
 ## Contact
 
