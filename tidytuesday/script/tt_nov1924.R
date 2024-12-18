@@ -161,7 +161,7 @@ metric_plot <- function(plot_criteria, plot_metric, plot_title){
             legend.position = "top"
         ) +
         labs(title = str_wrap(plot_title, 70),
-             caption = "Source: Bob's Burger curated by Steve Ponce.",
+             caption = "Source: Bob's Burger curated by Steven Ponce.",
              color = "")
     
     return(plot)
