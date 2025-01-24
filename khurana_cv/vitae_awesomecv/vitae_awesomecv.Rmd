@@ -1,13 +1,13 @@
 ---
 name: Havisha
 surname: Khurana
-position: "PhD Student"
+position: "PhD Candidate"
 address: "College of Education, University of Oregon"
 pronouns: she/her
 email: "havishak@uoregon.edu"
 github: havishak
 linkedin: havishak
-aboutme: "Special Education Policy Researcher, Quantiative Methodology, Data Enthusiast, Educator \\\n \\\nMy research focuses on access, discipline, and long-term outcomes for students with disabilities and other under-served populations in the US and India."
+aboutme: "I study the effect of education policy on the experiences of students with disabilities in the US and India.\\\nI have been involved in projects on school funding, school access, discipline, and reading assessments."
 date: "`r format(Sys.time(), '%B %Y')`"
 output:
   vitae::awesomecv:
@@ -39,7 +39,10 @@ names(import_data) <- list.files(here("data/"))
 import_data[["cv_entries.xlsx"]] %>%
   filter(type == "education") %>%
   mutate(
-    years = paste0(year_begin,"-", parse_number(year_end)),
+    years = paste0(year_begin,"-", year_end),
+    additional_info = ifelse(!is.na(additional_info),
+                             str_split(additional_info, "\r\n"),
+                             vector(mode = "list", length = 1))
   ) %>%
   detailed_entries(
     what = what,
@@ -48,26 +51,7 @@ import_data[["cv_entries.xlsx"]] %>%
     why = additional_info)
 ```
 
-# Employment History
-
-```{r}
-import_data[["cv_entries.xlsx"]] %>%
-  filter(type == "history") %>%
-  mutate(
-    years = case_when(
-      year_begin == year_end ~ year_begin,
-      is.na(year_end) ~ year_begin,
-      TRUE ~ paste0(year_begin,"-", parse_number(year_end)))
-  ) %>%
-  arrange(desc(year_begin)) %>%
-  detailed_entries(
-    what = what,
-    when = years,
-    with = where)
-  
-```
-
-# Researh 
+# Researh Experience
 
 ```{r}
 import_data[["research_projects_details.xlsx"]] %>%
@@ -90,6 +74,27 @@ import_data[["research_projects_details.xlsx"]] %>%
   )
 ```
 
+
+
+# Employment History
+
+```{r}
+import_data[["cv_entries.xlsx"]] %>%
+  filter(type == "history") %>%
+  mutate(
+    years = case_when(
+      year_begin == year_end ~ year_begin,
+      is.na(year_end) ~ year_begin,
+      TRUE ~ paste0(year_begin,"-", parse_number(year_end)))
+  ) %>%
+  arrange(desc(year_end), desc(year_begin)) %>%
+  detailed_entries(
+    what = what,
+    when = years,
+    with = where)
+```
+
+
 # Teaching
 
 ```{r}
@@ -109,10 +114,11 @@ import_data[["courses_taught.xlsx"]] %>%
     what = class_type,
     when = academic_year,
     with = title,
-    why = strsplit(responsibilities,"\n")
+    #why = strsplit(responsibilities,"\n")
   )
-
 ```
+
+\pagebreak
 
 # Awards
 
@@ -130,13 +136,14 @@ import_data[["cv_entries.xlsx"]] %>%
     )
 ```
 
-# Presentations
+# Presentations and Products
 
 ```{r, results = "asis"}
 presentations <- import_data[["pubs.xlsx"]] %>%
-  filter(type %in% c("conference", "presentation")) %>%
+  filter(type %in% c("conference", "presentation", "report")) %>%
   mutate(
-    entry = paste0("- ", authors, " (", year,"). ", title,". ", conference,". ", conf_loc,"."),
+    conf_loc = ifelse(is.na(conf_loc), " ", conf_loc),
+    entry = paste0("", authors, " (", year,"). ", title,". ", conference,". ", conf_loc,"."),
     month = gsub("(.*)(,.*)", "\\1", year)
     ) %>%
   rowwise() %>%
@@ -146,7 +153,14 @@ presentations <- import_data[["pubs.xlsx"]] %>%
   ungroup() %>%
   arrange(desc(parse_number(year)), desc(month))
 
-cat(unlist(presentations$entry), sep = "\\\n \\\n")
+presentations %>%
+  brief_entries(
+    what = entry,
+    when = parse_number(year),
+    with = ""
+    )
+
+#cat(unlist(presentations$entry), sep = "\\\n")
 ```
 
 
@@ -159,16 +173,20 @@ import_data[["training.xlsx"]] %>%
                    paste0(format(ymd(start_date), "%m/%d"), "-", format(ymd(end_date), "%m/%d"), "/", year(ymd(start_date))),
                    paste0("Valid upto ", format(ymd(valid_upto), "%m"), 
                          "/", format(ymd(valid_upto), "%d"), 
-                         "/", format(ymd(valid_upto), "%Y")))
+                         "/", format(ymd(valid_upto), "%Y"))),
+    year = format(ymd(start_date), "%Y"),
+    year = ifelse(is.na(year),format(ymd(valid_upto), "%Y"), year)
   ) %>%
-  detailed_entries(
-    what = institution,
-    when = dates,
-    with = name,
-    why = objective
+    arrange(desc(end_date)) %>%
+  brief_entries(
+    what = paste0(name,". ",institution),
+    when = year,
+    with = ""
+    #why = objective
   )
 ```
 
+\pagebreak
 
 # Grants
 
@@ -176,16 +194,39 @@ import_data[["training.xlsx"]] %>%
 grant <- import_data[["grants.xlsx"]] %>%
   mutate(
     entry = ifelse(!is.na(co_pi),
-    paste0(title, ". Role: ",role, " (With ", co_pi,")"),
+    paste0(title, ". Role: ",role, " (With ", co_pi,") "),
     paste0(title, ". ")),
-    entry = paste0("- ", entry, funding_agency,". (", str_to_title(type),").")
+    entry = paste0("", entry, funding_agency,". (", str_to_title(type),").")
     )
 
-cat(unlist(grant$entry), sep = "\\\n \\\n")
+grant %>%
+  brief_entries(
+    what = entry,
+    when = year,
+    with = ""
+    )
+
+#cat(unlist(grant$entry), sep = "\\\n")
   # brief_entries(
   #   what = entry,
   #   with = funding_agency,
   #   when = str_to_title(type)
   # )
 ```
+
+# Competencies
+
+```{r}
+import_data[["skills.xlsx"]] %>%
+  arrange(seq) %>%
+  brief_entries(
+    what = skills,
+    when = area,
+    with = ""
+    )
+```
+
+# Credits
+
+This CV was made in R using the `vitae` package. 
 
