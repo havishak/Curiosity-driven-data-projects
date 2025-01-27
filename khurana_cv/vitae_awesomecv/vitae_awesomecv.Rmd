@@ -6,7 +6,7 @@ address: "College of Education, University of Oregon"
 pronouns: she/her
 email: "havishak@uoregon.edu"
 github: havishak
-linkedin: havishak
+linkedin: havisha-khurana
 aboutme: "I study the effect of education policy on the experiences of students with disabilities in the US and India.\\\nI have been involved in projects on school funding, school access, discipline, and reading assessments."
 date: "`r format(Sys.time(), '%B %Y')`"
 output:
