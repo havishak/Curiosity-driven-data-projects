@@ -6,7 +6,7 @@ Maintaining a CV can be time-consuming and inconsistent, and to be honest, not m
 
 ## Steps
 
-- In the [data](khurana_cv/data) folder, I added experiences/achievements/accomplishments in different buckets. It took some trial and error, and I followed [Daniel Anderson's](https://github.com/datalorax/anderson-cv) data organization design as he was my instructor for the [Data Science Specialization](https://education.uoregon.edu/epol/specialization-educational-data-science) course and I just loved how he organizes things. I routinely edit it.
+- In the [data](data/) folder, I added experiences/achievements/accomplishments in different buckets. It took some trial and error, and I followed [Daniel Anderson's](https://github.com/datalorax/anderson-cv) data organization design as he was my instructor for the [Data Science Specialization](https://education.uoregon.edu/epol/specialization-educational-data-science) course and I just loved how he organizes things. I routinely edit it.
 
 - Next, choose/design a template. I used the [`vitae`](https://github.com/mitchelloharawild/vitae) package and in-built templates and functions to organize my work.
 
@@ -21,7 +21,7 @@ Maintaining a CV can be time-consuming and inconsistent, and to be honest, not m
 
 ### tab Awesome CV Template
 
-[khurana_awesome_cv_jan2025](khurana_cv/vitae_awesomecv/khurana_jan2025_vitae.pdf)
+[khurana_awesome_cv_jan2025](vitae_awesomecv/khurana_jan2025_vitae.pdf)
 
 ### tab Twenty-second CV 
 
