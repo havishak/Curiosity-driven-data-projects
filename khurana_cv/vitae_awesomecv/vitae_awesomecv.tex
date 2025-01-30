@@ -1,0 +1,272 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+% Awesome CV LaTeX Template for CV/Resume
+%
+% This template has been downloaded from:
+% https://github.com/posquit0/Awesome-CV
+%
+% Author:
+% Claud D. Park <posquit0.bj@gmail.com>
+% http://www.posquit0.com
+%
+%
+% Adapted to be an Rmarkdown template by Mitchell O'Hara-Wild
+% 23 November 2018
+%
+% Template license:
+% CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
+%
+%-------------------------------------------------------------------------------
+% CONFIGURATIONS
+%-------------------------------------------------------------------------------
+% A4 paper size by default, use 'letterpaper' for US letter
+\documentclass[11pt,a4paper,]{awesome-cv}
+
+% Configure page margins with geometry
+\usepackage{geometry}
+\geometry{left=1.4cm, top=.8cm, right=1.4cm, bottom=1.8cm, footskip=.5cm}
+
+
+% Specify the location of the included fonts
+\fontdir[fonts/]
+
+% Color for highlights
+% Awesome Colors: awesome-emerald, awesome-skyblue, awesome-red, awesome-pink, awesome-orange
+%                 awesome-nephritis, awesome-concrete, awesome-darknight
+
+\colorlet{awesome}{awesome-red}
+
+% Colors for text
+% Uncomment if you would like to specify your own color
+% \definecolor{darktext}{HTML}{414141}
+% \definecolor{text}{HTML}{333333}
+% \definecolor{graytext}{HTML}{5D5D5D}
+% \definecolor{lighttext}{HTML}{999999}
+
+% Set false if you don't want to highlight section with awesome color
+\setbool{acvSectionColorHighlight}{true}
+
+% If you would like to change the social information separator from a pipe (|) to something else
+\renewcommand{\acvHeaderSocialSep}{\quad\textbar\quad}
+
+\def\endfirstpage{\newpage}
+
+%-------------------------------------------------------------------------------
+%	PERSONAL INFORMATION
+%	Comment any of the lines below if they are not required
+%-------------------------------------------------------------------------------
+% Available options: circle|rectangle,edge/noedge,left/right
+
+\name{Havisha}{Khurana}
+
+\position{PhD Candidate}
+\address{College of Education, University of Oregon}
+
+\pronouns{she/her}
+\email{\href{mailto:havishak@uoregon.edu}{\nolinkurl{havishak@uoregon.edu}}}
+\github{havishak}
+\linkedin{havisha-khurana}
+
+% \gitlab{gitlab-id}
+% \stackoverflow{SO-id}{SO-name}
+% \skype{skype-id}
+% \reddit{reddit-id}
+
+\quote{I study the effect of education policy on the experiences of
+students with disabilities in the US and India.\\
+I have been involved in projects on school funding, school access,
+discipline, and reading assessments.}
+
+\usepackage{booktabs}
+
+\providecommand{\tightlist}{%
+	\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+%------------------------------------------------------------------------------
+
+
+
+% Pandoc CSL macros
+
+\begin{document}
+
+% Print the header with above personal informations
+% Give optional argument to change alignment(C: center, L: left, R: right)
+\makecvheader
+
+% Print the footer with 3 arguments(<left>, <center>, <right>)
+% Leave any of these blank if they are not needed
+% 2019-02-14 Chris Umphlett - add flexibility to the document name in footer, rather than have it be static Curriculum Vitae
+\makecvfooter
+  {January 2025}
+    {Havisha Khurana~~~·~~~Curriculum Vitae}
+  {\thepage~ of \pageref{LastPage}~}
+
+
+%-------------------------------------------------------------------------------
+%	CV/RESUME CONTENT
+%	Each section is imported separately, open each file in turn to modify content
+%------------------------------------------------------------------------------
+
+
+
+\section{Education}\label{education}
+
+\begin{cventries}
+    \cventry{Ph.D. Quantitative Research Methods in Education}{University of Oregon}{}{2021-Expected 2027}{\begin{cvitems}
+\item GPA: 4+
+\item Specialization in Educational Data Science with R
+\item Advisor: Prof. David Liebowitz
+\end{cvitems}}
+    \cventry{M.S. Economics}{University of Oregon}{}{2022-Expected 2025}{\begin{cvitems}
+\item GPA: 4+
+\item Advisor: Prof. Glen Waddell
+\item Thesis Title: Student First, or Budget First? Examining School Districts’ Spending Trends for Special Education Students.
+\end{cvitems}}
+    \cventry{B.S. (H) Mathematics}{St. Stephen's College, University of Delhi}{}{2014-2017}{}\vspace{-4.0mm}
+\end{cventries}
+
+\section{Researh Experience}\label{researh-experience}
+
+\begin{cventries}
+    \cventry{Spanish Instructions as a DIBELS® Accommodation}{Center for Teaching and Learning, University of Oregon - Dr. Gina Biancarosa and Dr. Patrick Kennedy}{}{2024}{\begin{cvitems}
+\item Performed regression and power analysis as outlined in the pre-analysis plan for an RCT design and drafted a technical report.
+\end{cvitems}}
+    \cventry{Investigating the effects of literacy tutoring on the reading achievement of struggling readers in grades K-2 during COVID-19 school closure}{Center for Teaching and Learning, University of Oregon - Dr. Gina Biancarosa and Dr. Patrick Kennedy}{}{2024}{\begin{cvitems}
+\item Developed the research design and used several matching-on-observable estimators to identify the causal effect of the tutoring program on struggling readers
+\end{cvitems}}
+    \cventry{Special education expenditures in Oregon}{Edunomics Lab, Georgetown University - Maggie Cicco}{}{2024}{\begin{cvitems}
+\item Identified and compiled Oregon administrative data on student membership, student state achievement, and special education expenditure for 2022.
+\end{cvitems}}
+    \cventry{Who are the students school frequently suspend?}{Department of Education Studies, University of Oregon - Dr. David Liebowitz}{}{2023}{\begin{cvitems}
+\item Cleaned and compiled analysis-ready data file using Oregon administrative data.
+\item Performed statistical analysis using multi-level regression models, variation decomposition analysis, and unsupervised machine learning clustering algorithm .
+\item Disseminated results at two national policy-level conferences and co-drafted a working paper.
+\end{cvitems}}
+    \cventry{DIBELS8 Secure form creation}{Center for Teaching and Learning, University of Oregon - Dr. Gina Biancarosa and Dr. Patrick Kennedy}{}{2023}{\begin{cvitems}
+\item Automated test form generation and quality control checks for alternative DIBELS8 subtests using R
+\end{cvitems}}
+    \cventry{Comparing Reading Growth Trajectories Pre- and Post-COVID-19-related School Closure in a Large Urban District}{Center for Teaching and Learning, University of Oregon - Dr. Gina Biancarosa and Dr. Patrick Kennedy}{}{2023}{\begin{cvitems}
+\item Employed multi-level piecewise growth models to estimate shifts in average reading scores and examine demographic heterogeneity in a large urban district panel sample during the years impacted by COVID-19 school closures.
+\item Summarized findings in a executive report and presented results to district administration.
+\end{cvitems}}
+    \cventry{Rethinking principal effects on student outcomes}{Department of Education Studies, University of Oregon - Dr. David Liebowitz}{}{2022}{\begin{cvitems}
+\item Cleaned and compiled Oregon administrative data on discipline, high-school graduation, and National Student Clearinghouse data on college outcomes for project analysis.
+\item Developed and maintained annotated, reproducible R code.
+\end{cvitems}}
+    \cventry{Three-year analysis of DIBEL8 Reading Assessment Data}{Center for Teaching and Learning, University of Oregon - Dr. Gina Biancarosa and Dr. Patrick Kennedy}{}{2022}{\begin{cvitems}
+\item Summarized, visualized, and created R dashboards to describe changes in student reading outcomes across COVID-19 school closure phases for internal use.
+\item Conducted a comprehensive literature review on the early evidence of learning growth changes related to COVID-19 pandemic for internal purposes
+\end{cvitems}}
+\end{cventries}
+
+\section{Teaching Experience}\label{teaching-experience}
+
+\begin{cventries}
+    \cventry{Sequence of 3 In-Person, Graduate-LevelClasses.: Main Instructor/TA}{EDUC 641/643/645: Applied Statistics in Education and Human Services (Discussion Session)}{}{2022-24}{\begin{cvitems}
+\item Led lab sessions introducing R programming langugage to run, analyze, and communicate results from common statistical models
+\item Developed learning material (worksheets) for student practice and summarizing concepts
+\item Supervised a team of 2-3 GEs
+\item Held virtual and in-person office hours for answering students' questions
+\item Graded student assignment and provided feedback through a rubric
+\end{cvitems}}
+    \cventry{Synchronous, Undergraduate-Level: TA}{EDLD 312: Effective Leadership Decision-making}{}{2022}{\begin{cvitems}
+\item Reviewed course materials
+\item Provided feedback on student presentations and assignments
+\item Delivered mini-lectures and led class-activities during synchronous sessions
+\end{cvitems}}
+    \cventry{In-Person, Undergraduate-Level: TA}{EDLD 313: Program Evaluation for Future Leaders}{}{2022}{\begin{cvitems}
+\item Reviewed course materials
+\item Provided feedback on student presentations and assignments
+\item Delivered mini-lectures and led class-activities during synchronous sessions
+\end{cvitems}}
+    \cventry{Asynchronous, Undergraduate-Level: TA}{EDLD 411: Examining Leadership Effectiveness through Professional Development}{}{2021}{\begin{cvitems}
+\item Reviewed course materials
+\item Graded weekly assignments and provided feedback
+\end{cvitems}}
+    \cventry{Synchronous, Middle And High School-Level}{STEM tutoring sessions}{}{2019-20}{\begin{cvitems}
+\item Led small-group tutoring sessions following the organizations' learning plans
+\end{cvitems}}
+    \cventry{In-Person, Middle And High School-Level}{Mathematics school teacher}{}{2017-19}{\begin{cvitems}
+\item Designed and delivered lesson plans using 5-step activity-based framework (engage, explain, guided practice, independent practice, closure)
+\item Mentored, counseled and tailored support for students from diverse low-income backgrounds and needs
+\item Exposed students to new educational and career opportunities
+\end{cvitems}}
+\end{cventries}
+
+\pagebreak
+
+\section{Employment History}\label{employment-history}
+
+\begin{cventries}
+    \cventry{Teaching Assisstant}{Department of Education Studies, University of Oregon}{}{2021-2025}{}\vspace{-4.0mm}
+    \cventry{Research Assistant}{Prof. Gina Biancarosa, Center for Teaching and Learning, University of Oregon}{}{2022-2024}{}\vspace{-4.0mm}
+    \cventry{Research Assistant}{Prof. David Liebowitz, Department of Education Studies, University of Oregon}{}{2021-2024}{}\vspace{-4.0mm}
+    \cventry{Teaching Resource Consultant}{OpenLinks Foundation}{}{2019-2021}{}\vspace{-4.0mm}
+    \cventry{Teaching Consultant}{LIDO Learning}{}{2019-2020}{}\vspace{-4.0mm}
+    \cventry{School Team Lead}{Teach for India, Sunrise English Medium School}{}{2018-2019}{}\vspace{-4.0mm}
+    \cventry{School Teacher}{Teach for India, Sunrise English Medium School}{}{2017-2019}{}\vspace{-4.0mm}
+\end{cventries}
+
+\section{Awards}\label{awards}
+
+\begin{cvhonors}
+    \cvhonor{}{Innovation Faculty Research Award (Awarded to Prof. David Liebowitz for our co-led project on school discipline) - Office of the Vice President for Research and Innovation, University of Oregon.}{\$10,000}{2024}
+    \cvhonor{}{Lorraine Moe Davis Scholarship and the College of Education Scholarship - College of Education.}{\$7,000}{2024}
+    \cvhonor{}{Certificate in Education Finance - Edunomics Lab, Georgetown University.}{\$3,500}{2024}
+    \cvhonor{}{Education Methodology, Policy, and Leadership (EMPL) Travel Grant - Department of Education Studies, University of Oregon.}{\$1,000}{2024}
+    \cvhonor{}{Research Transparency and Reproducibility Training (RT2) funding - Berkeley Initiative for Transparency in the Social Sciences (BITSS).}{\$700}{2024}
+    \cvhonor{}{Outstanding Poster - Graduate Student Research Forum, University of Oregon.}{\$300}{2024}
+    \cvhonor{}{National Assessment of Educational Progress (NAEP) Data Training - Department of Education, USA.}{}{2024}
+    \cvhonor{}{Lillyan A Barry Scholarship - University of Oregon.}{\$3,600}{2023}
+    \cvhonor{}{Education Methodology, Policy, and Leadership (EMPL) Travel Grant - Department of Education Studies, University of Oregon.}{\$500}{2023}
+    \cvhonor{}{Harvey E Lee Graduate Scholarship - University of Oregon.}{\$3,600}{2022}
+    \cvhonor{}{College of Education Scholarship - College of Education.}{\$3,000}{2022}
+    \cvhonor{}{Outstanding Poster - Graduate Student Research Forum, University of Oregon.}{\$300}{2022}
+    \cvhonor{}{Winner - USAFacts Data Visualization Competition, University of Oregon.}{}{2022}
+    \cvhonor{}{Graduate School Promising Scholar Award - Division of Graduate Studies, University of Oregon.}{\$6,000}{2021}
+    \cvhonor{}{Teach for India Fellowship - Teach for All.}{}{2017}
+\end{cvhonors}
+
+\section{Presentations and Products}\label{presentations-and-products}
+
+\begin{cvhonors}
+    \cvhonor{}{Khurana, H., Otterstedt, J., Biancarosa, G., Kennedy, P. (December, 2024). Spanish Instructions as a DIBELS® Accommodation. Technical Report. }{}{2024}
+    \cvhonor{}{Khurana, H., Liebowitz, D.D. (November, 2024). Who are the Students School Frequently Suspend?. Association for Public Policy and Management. National Harbor, Maryland.}{}{2024}
+    \cvhonor{}{Khurana, H., Liebowitz, D.D. (May, 2024). Who are the Students School Frequently Suspend?. Graduate Research Forum, University of Oregon. Eugene, OR.}{}{2024}
+    \cvhonor{}{Khurana, H., Liebowitz, D.D. (March, 2024). Who are the Students School Frequently Suspend?. Association for Education Finance \& Policy. Baltimore, MD.}{}{2024}
+    \cvhonor{}{Biancarosa, G., Khurana, H., Kennedy, P. (December, 2023). Comparing Reading Growth Trajectories Pre- and Post-COVID-19-related School Closure in a Large Urban District. District Presentation. Virtual.}{}{2023}
+    \cvhonor{}{Khurana, H., Lee, S. (May, 2023). COVID-19 Related School Closure and Reading Outcomes. Graduate Research Forum, University of Oregon. Eugene, OR.}{}{2023}
+    \cvhonor{}{Klaas, M., Khurana. H. (May, 2022). Diversity, Expenditure, and Achievement in US Public Schools. Graduate Research Forum, University of Oregon. Eugene, OR.}{}{2022}
+\end{cvhonors}
+
+\section{Training}\label{training}
+
+\begin{cvhonors}
+    \cvhonor{}{Graduate Writing Program. University of Oregon Center on Diversity and Community and Division of Graduate Studies}{}{2025}
+    \cvhonor{}{Certificate in Education Finance. Edunomics Lab, Georgetown University}{}{2024}
+    \cvhonor{}{Big Data with Arrow in R. Posit Conference}{}{2024}
+    \cvhonor{}{National Assessment of Educational Progress (NAEP) Data Training. US Department of Education and American Institutes for Research}{}{2024}
+    \cvhonor{}{Research Transparency and Reproducibility Training (RT2). Berkeley Initiative for Transparency in the Social Sciences (BITSS), University of California}{}{2024}
+    \cvhonor{}{Human Research - Social-Behavioral-Educational Researchers (ID 5521) -
+Basic and Refresher Course. Collaborative Institutional Training Initiative (CITI)}{}{Valid till 2026}
+    \cvhonor{}{NSF/NIH Responsible Conduct of Research Training for Researchers (ID 103727). Collaborative Institutional Training Initiative (CITI)}{}{Valid till 2026}
+\end{cvhonors}
+
+\section{Competencies}\label{competencies}
+
+\begin{cvhonors}
+    \cvhonor{}{Statistics and Probability Theory; Generalized Regression Models; Causal Inference/Quasi-Experiment Designs; Program Evaluation; Measurement Theory and Rasch Models; Multivariate Statistics; Monte-Carlo Simulations}{}{Methods}
+    \cvhonor{}{Worked with cross-sectional, cross-sectional with repeated time longitudinal, and text
+data; Data wrangling, visualization, and preparation for analyses}{}{Data}
+    \cvhonor{}{R (Expert); Python (Intermediate); LaTeX (Beginner)}{}{Coding}
+    \cvhonor{}{English (Proficient), Hindi (Proficient)}{}{Languages}
+\end{cvhonors}
+
+\section{Credits}\label{credits}
+
+This CV was made in R using the \texttt{vitae} package.
+
+
+\label{LastPage}~
+\end{document}

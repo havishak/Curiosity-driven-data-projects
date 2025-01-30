@@ -56,10 +56,11 @@ import_data[["cv_entries.xlsx"]] %>%
 ```{r}
 import_data[["research_projects_details.xlsx"]] %>%
   arrange(desc(year_begin)) %>%
-  group_by(year_begin, pi) %>%
-  summarize(
-    project = reduce(project, paste, sep = " & "),
-    responsibilities = reduce(responsibilities, paste, sep = "\n"),
+  #group_by(year_begin, pi) %>%
+  # summarize(
+  #   project = reduce(project, paste, sep = " & "),
+  #   responsibilities = reduce(responsibilities, paste, sep = "\n"),
+    mutate(
     description = paste(where,pi,sep = " - ")
   ) %>%
   distinct() %>%
@@ -74,7 +75,30 @@ import_data[["research_projects_details.xlsx"]] %>%
   )
 ```
 
+# Teaching Experience
 
+```{r}
+import_data[["courses_taught.xlsx"]] %>%
+  arrange(desc(academic_year), title) %>%
+  mutate(
+    class_type = paste0(str_to_title(mode),
+                        ", ",str_to_title(level),"-Level"),
+    class_type = ifelse(!is.na(seq),
+                        paste0("Sequence of ", seq, " ", class_type, "Classes."),
+                        class_type),
+    class_type = ifelse(!is.na(role),
+                        paste(class_type,role, sep = ": "),
+                        class_type)
+  )  %>%
+  detailed_entries(
+    what = class_type,
+    when = academic_year,
+    with = title,
+    why = strsplit(responsibilities,"\n")
+  )
+```
+
+\pagebreak
 
 # Employment History
 
@@ -94,31 +118,7 @@ import_data[["cv_entries.xlsx"]] %>%
     with = where)
 ```
 
-
-# Teaching
-
-```{r}
-import_data[["courses_taught.xlsx"]] %>%
-  arrange(desc(academic_year), title) %>%
-  mutate(
-    class_type = paste0(str_to_title(mode),
-                        ", ",str_to_title(level),"-Level"),
-    class_type = ifelse(!is.na(seq),
-                        paste0("Sequence of ", seq, " ", class_type, "Classes."),
-                        class_type),
-    class_type = ifelse(!is.na(role),
-                        paste(class_type,role, sep = ": "),
-                        class_type)
-  )  %>%
-  detailed_entries(
-    what = class_type,
-    when = academic_year,
-    with = title,
-    #why = strsplit(responsibilities,"\n")
-  )
-```
-
-\pagebreak
+<!-- \pagebreak -->
 
 # Awards
 
@@ -130,7 +130,7 @@ import_data[["cv_entries.xlsx"]] %>%
   mutate(amount = scales::dollar(parse_number(amount))
 ) %>%
   brief_entries(
-    what = paste(what, where, sep = "- "),
+    what = paste0(paste(what, where, sep = " - "),"."),
     when = year_begin,
     with = amount
     )
@@ -144,6 +144,7 @@ presentations <- import_data[["pubs.xlsx"]] %>%
   mutate(
     conf_loc = ifelse(is.na(conf_loc), " ", conf_loc),
     entry = paste0("", authors, " (", year,"). ", title,". ", conference,". ", conf_loc,"."),
+    entry = ifelse(type == "report", gsub(" \\.","", entry), entry), # fixing double . in technical report since there is no conf_loc.
     month = gsub("(.*)(,.*)", "\\1", year)
     ) %>%
   rowwise() %>%
@@ -169,13 +170,13 @@ presentations %>%
 ```{r}
 import_data[["training.xlsx"]] %>%
   mutate(
-    dates = ifelse(is.na(valid_upto), 
-                   paste0(format(ymd(start_date), "%m/%d"), "-", format(ymd(end_date), "%m/%d"), "/", year(ymd(start_date))),
-                   paste0("Valid upto ", format(ymd(valid_upto), "%m"), 
-                         "/", format(ymd(valid_upto), "%d"), 
-                         "/", format(ymd(valid_upto), "%Y"))),
+    # dates = ifelse(is.na(valid_upto), 
+    #                paste0(format(ymd(start_date), "%m/%d"), "-", format(ymd(end_date), "%m/%d"), "/", year(ymd(start_date))),
+    #                paste0("Valid upto ", format(ymd(valid_upto), "%m"), 
+    #                      "/", format(ymd(valid_upto), "%d"), 
+    #                      "/", format(ymd(valid_upto), "%Y"))),
     year = format(ymd(start_date), "%Y"),
-    year = ifelse(is.na(year),format(ymd(valid_upto), "%Y"), year)
+    year = ifelse(!is.na(valid_upto),paste0("Valid till ", format(ymd(valid_upto), "%Y")), year),
   ) %>%
     arrange(desc(end_date)) %>%
   brief_entries(
@@ -186,33 +187,32 @@ import_data[["training.xlsx"]] %>%
   )
 ```
 
-\pagebreak
 
-# Grants
+<!-- # Grants -->
 
-```{r, results = "asis"}
-grant <- import_data[["grants.xlsx"]] %>%
-  mutate(
-    entry = ifelse(!is.na(co_pi),
-    paste0(title, ". Role: ",role, " (With ", co_pi,") "),
-    paste0(title, ". ")),
-    entry = paste0("", entry, funding_agency,". (", str_to_title(type),").")
-    )
+<!-- ```{r, results = "asis"} -->
+<!-- grant <- import_data[["grants.xlsx"]] %>% -->
+<!--   mutate( -->
+<!--     entry = ifelse(!is.na(co_pi), -->
+<!--     paste0(title, ". Role: ",role, " (With ", co_pi,") "), -->
+<!--     paste0(title, ". ")), -->
+<!--     entry = paste0("", entry, funding_agency,". (", str_to_title(type),").") -->
+<!--     ) -->
 
-grant %>%
-  brief_entries(
-    what = entry,
-    when = year,
-    with = ""
-    )
+<!-- grant %>% -->
+<!--   brief_entries( -->
+<!--     what = entry, -->
+<!--     when = year, -->
+<!--     with = "" -->
+<!--     ) -->
 
-#cat(unlist(grant$entry), sep = "\\\n")
-  # brief_entries(
-  #   what = entry,
-  #   with = funding_agency,
-  #   when = str_to_title(type)
-  # )
-```
+<!-- #cat(unlist(grant$entry), sep = "\\\n") -->
+<!--   # brief_entries( -->
+<!--   #   what = entry, -->
+<!--   #   with = funding_agency, -->
+<!--   #   when = str_to_title(type) -->
+<!--   # ) -->
+<!-- ``` -->
 
 # Competencies
 
@@ -225,6 +225,22 @@ import_data[["skills.xlsx"]] %>%
     with = ""
     )
 ```
+
+<!-- # References -->
+
+
+
+<!-- ```{r, results = "asis"} -->
+<!-- ref <-  import_data[["references.xlsx"]] %>% -->
+<!--     filter(!is.na(name)) %>% -->
+
+<!--   mutate( -->
+<!--       description = paste(name, relationship, current_pos, contact, sep = "\\\\"), -->
+<!--       description = gsub("\r\n","\\\\",description) -->
+<!--   ) -->
+
+<!-- cat(unlist(ref$description), sep = "\\\\") -->
+<!-- ``` -->
 
 # Credits
 

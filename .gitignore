@@ -56,3 +56,4 @@ LanguagesEducationCountries/
 
 # Ignore some confidential data
 khurana_cv/data/coursework.xlsx
+khurana_cv/data/references.xlsx
