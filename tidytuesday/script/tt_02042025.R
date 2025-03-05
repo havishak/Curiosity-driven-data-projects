@@ -1,5 +1,5 @@
 set.seed(10)
-# the ones i didn't dp
+# the ones i didn't do
 sample(c(48:53, 1:7),1)
 
 # Doing week 5 of 2025.
