@@ -1,0 +1,205 @@
+---
+title: "Bring your own data"
+author: "Havisha Khurana"
+---
+
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      error = FALSE,
+                      fig.height = 6,
+                      fig.width = 8)
+
+# loading packages
+pacman::p_load("tidyverse","here","janitor","ggthemes", "educationdata", "ggtext")
+```
+
+```{r}
+#theme for all visuals
+
+plot_theme <- function() {
+  theme(
+  text = element_text(family = 'sans', 
+                      size = 9,
+                      color = "#646464"),
+  plot.title.position = "plot",
+  plot.title = element_text(face="bold", 
+                            size = 24,
+                            color = "#212121"),
+  plot.subtitle = element_text(size = 14,
+                               color = "#212121"),
+  plot.caption = element_text(hjust = 0),
+  axis.title = element_text(face="bold"),
+  axis.text = element_text(face="bold"),
+ # axis.text.y = element_text(margin=margin(r=1))
+  )
+}
+
+# gist to preview ggplot
+# ggpreview <- function(...) {
+#   fname <- tempfile(fileext = ".png")
+#   ggsave(filename = fname, ...)
+#   system2("open", fname)
+#   invisible(NULL)
+# }
+
+```
+
+
+```{r}
+# Student membership by race and state for 2017-18 school year
+sm <- get_education_data_summary(
+  level = "school-districts",
+  source = "ccd",
+  topic = "enrollment",
+  stat = "sum",
+  by = c("race","fips"),
+  var = "enrollment",
+  filters = list(year = 2018)
+)
+
+# Though we got the dataset, fips and race are integers and not factors
+
+# Extracting fips codes from census website
+
+states <- read.csv("https://www2.census.gov/geo/docs/reference/state.txt", sep = "|") %>%
+  clean_names() %>%
+  rename("fips" = state)
+
+# Join to sm file
+
+sm <- sm %>%
+  left_join(states)
+
+# race == 1, is 'White/Non-Hispanic students', other codes are for students of color.
+# Since we want binary categories, let's make a race_cat variable
+# Then find proportion of students of color in a given state
+# 99 means not specified, so will exclude this variable
+
+sm <- sm %>% 
+    mutate(race_cat = ifelse(race == 1, "White", "People of Color"),
+           race_cat = ifelse(race == 99, NA, race_cat)) %>%
+    filter(!is.na(race_cat)) %>%
+    group_by(fips) %>%
+    mutate(tot_students = sum(enrollment, na.rm = T)) %>%
+    group_by(fips, race_cat, state_name) %>% 
+    summarise(
+        student_cat = sum(enrollment, na.rm = TRUE),
+        Student_color_pct = round(student_cat*100/tot_students, 2)
+    ) %>%
+  distinct() %>%
+  ungroup() %>%
+  filter(race_cat == "People of Color") %>%
+  select(state_name, Student_color_pct)
+```
+
+
+
+```{r}
+# read teacher diversity data
+# retrieved from https://nces.ed.gov/surveys/ntps/tables/ntps1718_fltable01_t1s.asp
+
+teacher <- rio::import("https://nces.ed.gov/surveys/ntps/xls/ntps1718_fltable01_t1s.xlsx", skip = 2, n_max = 62) %>% 
+    clean_names() %>% 
+    select(-c(3,5,7,9,11,13,15)) %>% 
+    filter(!is.na(state))
+teacher[teacher == "#"] <- 0 #code-book says # means rounds to 0
+teacher[teacher == "‡"] <- NA #code-book says this symbol means there were inconsistencies in the data
+
+# select relevant variables
+teacher <- teacher %>% 
+    select(
+        "White" = white_non_hispanic,
+        "Black or African American" = black_or_african_american_non_hispanic,
+        "American Indian or Alaska Native" = american_indian_alaska_native_non_hispanic,
+        "Asian" = asian_non_hispanic,
+        "Hispanic/Latino" = hispanic_regardless_of_race1,
+        "Native Hawaiian or Other Pacific Islander" = native_hawaiian_pacific_islander_non_hispanic,
+        "Two or more races" = two_or_more_races_non_hispanic,
+        everything()
+    ) 
+
+# make percent of teachers of color by state
+teacher <- teacher %>% 
+    pivot_longer(
+        cols = c(1:7),
+        names_to = "race",
+        values_to = "percent_t"
+    ) %>%  
+    mutate(percent_t = readr::parse_number(percent_t)) %>%  
+    filter(state!= "United States") %>% 
+    mutate(
+        race_cat = ifelse(race == "White", "White","People of Color")
+    ) %>%
+    group_by(state, race_cat) %>% 
+    summarise(
+        Teacher_color_pct = sum(percent_t, na.rm = TRUE)
+    ) %>%
+    filter(race_cat == "People of Color") 
+
+# Join student and teacher datafram
+stu_teacher <- teacher %>%
+              left_join(sm, 
+                        by = c("state" = "state_name")) %>% 
+              pivot_longer(
+                  cols = c("Teacher_color_pct", "Student_color_pct"),
+                  names_to = "role",
+                  names_pattern = "(.*)_color_pct",
+                  values_to = "percent"
+              ) %>%
+  # removing state with no teacher information
+    filter(!state %in% c("Maryland", "District of Columbia")) 
+```
+
+```{r}
+# Make a dot plot comparing teacher vs student racial diversity.
+dotplot <- ggplot(stu_teacher, aes(x = percent, y = forcats::fct_reorder(state, percent))) +
+    geom_line(aes(group = state), 
+            linetype = "dotted", color = "gray60")+
+    geom_point(aes(color = role),
+                  size = 2)+
+    geom_text(aes(x=percent,
+                  y=state,
+                  label = round(percent,0),
+                  color = role),
+               nudge_x = 3, size = 3, family = "sans",
+              show.legend = FALSE)+
+    scale_color_manual(limits = c("Teacher","Student"),
+                      values = c("#00347B","#E62790"), 
+                       name = "")+
+    scale_x_continuous(expand = c(0,0), limits = c(0,95))+
+   theme_minimal()+
+    labs(
+        x = "Percent identifying as Person of Color",
+        y  = "",
+        title = "Diveristy Gap in K-12 Public Schools",
+        subtitle = "In SY 2017-18, <span style = 'color: #00347B'>**21%**</span> of all teachers but <span style = 'color: #E62790'>**52%**</span> of all students <br>identified as persons of color.",
+        caption = "**Source:** U.S. Department of Education, National Center for Education Statistics, CCD and NTPS." 
+        )+
+    plot_theme()+
+    theme(
+        plot.background = element_rect(fill = "#fffbf1",
+                                        color = "transparent"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text.x = element_blank(),
+        #axis.text.y = element_text(size = 9),
+        axis.line.x = element_line(colour = "gray90"),
+        legend.text  = element_text(size = 11),
+        legend.box.background = element_blank(),
+        legend.position = "top",
+        legend.justification = "right",
+        legend.direction = "horizontal",
+        plot.caption = element_markdown(),
+        plot.subtitle = element_markdown()
+)
+
+dotplot
+```
+
+```{r}
+#ggsave(here("products","tt_01072025_ed_diversity.jpeg"), height = 7, width = 6, unit = "in")
+```
+

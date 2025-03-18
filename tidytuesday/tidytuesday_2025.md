@@ -1,5 +1,16 @@
 ### Weekly Projects - 2025
 
+Jan 7 (Week 1)
+
+**Data:** Bring your own data, NCES Data on Student and Teacher Demographics
+
+**Question:** How does student and teacher racial demographic characters compare in US states?
+
+**Approach:** Made a dot-plot.
+
+<img src="products/tt_01072025_ed_diversity.jpeg" width="800">
+
+
 Jan 28 (Week 4)
 
 **Data:** [Water Insecurity](https://cran.r-project.org/package=tidycensus)
@@ -19,3 +30,17 @@ Feb 4 (Week 5)
 **Approach:** Created a proportional bar chart.
 
 <img src="products/tt_02042025_simpsons_gender.jpeg" width="800">
+
+March 11 (Week 10)
+
+**Data:** Pixar Data
+
+**Question:** What is the difference in Pixar film rankings by different review aggregators?
+
+**Approach:** Created a series of line plots, highlighting most-agreed and most-disagreed rankings.
+
+<img src="products/tt_03112025_pixar_reviews.png" width="800">
+
+<img src="products/tt_03112025_pixar_reviews_agreements.png" width="800">
+
+<img src="products/tt_03112025_pixar_reviews_disagreements.png" width="800">
