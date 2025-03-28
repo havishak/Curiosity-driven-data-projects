@@ -82,13 +82,13 @@ grid.text(str_wrap(title, 30),
           x = unit(0.7, "npc"),  # Relative x position (0 to 1 scale)
           y = unit(0.8, "npc"),  # Relative y position (0 to 1 scale)
           gp = gpar(col = "gray70", 
-                    fontsize = 40, fontface = "bold", family = title_font, lineheight = 0.5))
+                    fontsize = 40, fontface = "bold", fontfamily = title_font, lineheight = 0.5))
 
 grid.draw(richtext_grob(subtitle,
           x = unit(0.7, "npc"),  # Relative x position (0 to 1 scale)
-          y = unit(0.62, "npc"),  # Relative y position (0 to 1 scale)
+          y = unit(0.6, "npc"),  # Relative y position (0 to 1 scale)
           gp = gpar(col = "gray70", 
-                    fontsize = 20, fontface = "italic", family = body_font, lineheight = 0.5)))
+                    fontsize = 30, fontface = "italic", fontfamily = body_font, lineheight = 0.5)))
 
 #saved using the export feature.
 

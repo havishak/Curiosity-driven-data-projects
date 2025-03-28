@@ -31,6 +31,18 @@ Feb 4 (Week 5)
 
 <img src="products/tt_02042025_simpsons_gender.jpeg" width="800">
 
+March 4 (Week 9)
+
+**Data:** Long Beach Animal Shelter
+
+**Question:** What is the distribution of outcome types by intake condition?
+
+**Approach:** Created a a waffle plot.
+
+**Acknowledgment:** I took inspiration and code from [this plot in the R Graph Gallery](https://r-graph-gallery.com/web-waffle-for-time-evolution.html) by Muhammad Azhar.  
+
+<img src="products/tt_03042025_longbeach.png" width="800">
+
 March 11 (Week 10)
 
 **Data:** Pixar Data
