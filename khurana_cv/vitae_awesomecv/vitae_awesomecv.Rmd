@@ -7,7 +7,7 @@ pronouns: she/her
 email: "havishak@uoregon.edu"
 github: havishak
 linkedin: havisha-khurana
-aboutme: "I study the effect of education policy on the experiences of students with disabilities in the US and India.\\\nI have been involved in projects on school funding, school access, discipline, and reading assessments."
+aboutme: "Drawing from my experience as an educator in a low-income school, I am passionate about evidence-based policies that promote a fair and inclusive education system. My professional interests lie at the intersection of education and disability policy in the United States and India. Using quantitative descriptive and causal inference methods, I document the impact of policies on students with disabilities and other underserved populations. I have provided methodological and analytical support to research projects on school discipline, reading assessments, school funding, and school access."
 date: "`r format(Sys.time(), '%B %Y')`"
 output:
   vitae::awesomecv:
@@ -84,7 +84,7 @@ import_data[["courses_taught.xlsx"]] %>%
     class_type = paste0(str_to_title(mode),
                         ", ",str_to_title(level),"-Level"),
     class_type = ifelse(!is.na(seq),
-                        paste0("Sequence of ", seq, " ", class_type, "Classes."),
+                        paste0("Sequence of ", seq, " ", class_type, " Classes"),
                         class_type),
     class_type = ifelse(!is.na(role),
                         paste(class_type,role, sep = ": "),
@@ -180,7 +180,7 @@ import_data[["training.xlsx"]] %>%
   ) %>%
     arrange(desc(end_date)) %>%
   brief_entries(
-    what = paste0(name,". ",institution),
+    what = paste0(name,". ",institution,"."),
     when = year,
     with = ""
     #why = objective
