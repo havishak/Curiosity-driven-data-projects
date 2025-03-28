@@ -1,6 +1,6 @@
 ### Weekly Projects - 2024
 
-July 16 (Week 29)
+### July 16 (Week 29)
 
 **Data:** [The English Women's Football (EWF) Database](https://github.com/probjects/ewf-database)
 

@@ -1,6 +1,6 @@
 ### Weekly Projects - 2025
 
-Jan 7 (Week 1)
+### Jan 7 (Week 1)
 
 **Data:** Bring your own data, NCES Data on Student and Teacher Demographics
 
@@ -11,7 +11,7 @@ Jan 7 (Week 1)
 <img src="products/tt_01072025_ed_diversity.jpeg" width="800">
 
 
-Jan 28 (Week 4)
+### Jan 28 (Week 4)
 
 **Data:** [Water Insecurity](https://cran.r-project.org/package=tidycensus)
 
@@ -21,7 +21,7 @@ Jan 28 (Week 4)
 
 <img src="products/tt_01282025_water_insecurity.jpeg" width="800">
 
-Feb 4 (Week 5)
+### Feb 4 (Week 5)
 
 **Data:** [Donuts, Data, and D'oh - A Deep Dive into The Simpsons](https://www.kaggle.com/datasets/prashant111/the-simpsons-dataset)
 
@@ -31,7 +31,7 @@ Feb 4 (Week 5)
 
 <img src="products/tt_02042025_simpsons_gender.jpeg" width="800">
 
-March 4 (Week 9)
+### March 4 (Week 9)
 
 **Data:** Long Beach Animal Shelter
 
@@ -43,7 +43,7 @@ March 4 (Week 9)
 
 <img src="products/tt_03042025_longbeach.png" width="800">
 
-March 11 (Week 10)
+### March 11 (Week 10)
 
 **Data:** Pixar Data
 
