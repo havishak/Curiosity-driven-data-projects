@@ -7,8 +7,12 @@ pronouns: she/her
 email: "havishak@uoregon.edu"
 github: havishak
 linkedin: havisha-khurana
-aboutme: "Drawing from my experience as an educator in a low-income school, I am passionate about evidence-based policies that promote a fair and inclusive education system. My professional interests lie at the intersection of education and disability policy in the United States and India. Using quantitative descriptive and causal inference methods, I document the impact of policies on students with disabilities and other underserved populations. I have provided methodological and analytical support to research projects on school discipline, reading assessments, school funding, and school access."
+aboutme: "Drawing from my experiences as an educator in a low-income school, I am passionate about evidence-based policies that promote a fair and inclusive education system. I use descriptive quantitative analysis and econometrics methods to study the impact of policies on students with disabilities and other underserved populations."
+phone: (541) 579-0876
 date: "`r format(Sys.time(), '%B %Y')`"
+headcolor: "000000" 
+urlcolor: black
+linkcolor: black
 output:
   vitae::awesomecv:
     page_total: true
@@ -65,7 +69,7 @@ import_data[["research_projects_details.xlsx"]] %>%
   ) %>%
   distinct() %>%
     ungroup() %>%
-  arrange(desc(year_begin)) %>%
+  arrange(desc(year_begin), order) %>%
   detailed_entries(
     what = project,
     when = year_begin,
@@ -93,32 +97,127 @@ import_data[["courses_taught.xlsx"]] %>%
   detailed_entries(
     what = class_type,
     when = academic_year,
-    with = title,
-    why = strsplit(responsibilities,"\n")
+    with = title
+    #why = strsplit(responsibilities,"\n")
   )
 ```
-
-\pagebreak
 
 # Employment History
 
 ```{r}
 import_data[["cv_entries.xlsx"]] %>%
-  filter(type == "history") %>%
+  filter(type == "history",
+         !grepl("Lead", what)) %>%
   mutate(
     years = case_when(
       year_begin == year_end ~ year_begin,
       is.na(year_end) ~ year_begin,
       TRUE ~ paste0(year_begin,"-", parse_number(year_end)))
   ) %>%
-  arrange(desc(year_end), desc(year_begin)) %>%
+  # arrange(desc(year_end), desc(year_begin)) %>%
   detailed_entries(
     what = what,
     when = years,
     with = where)
 ```
 
-<!-- \pagebreak -->
+<!-- # Leadership Experience -->
+
+```{r, eval = F}
+import_data[["leadership.xlsx"]] %>%
+  filter(type == "leadership") %>%
+  arrange(desc(parse_number(year_begin))) %>%
+  detailed_entries(
+    what = what,
+    when = ifelse(!is.na(year_end), paste0(year_begin,"-", year_end), year_begin),
+    with = where)
+```
+
+<!-- # Volunteer Experience -->
+
+```{r eval = F}
+import_data[["leadership.xlsx"]] %>%
+  filter(type == "volunteer") %>%
+  arrange(desc(year_begin)) %>%
+  brief_entries(
+    what = paste0(where," : ", description),
+    when = ifelse(!is.na(year_end), paste0(year_begin,"-", year_end), year_begin),
+    with = hours)
+```
+
+# Products
+
+\small
+
+**Working Papers**
+
+```{r, results = "asis"}
+working_papers <- import_data[["pubs.xlsx"]] %>%
+  filter(type %in% c("progress")) %>%
+  mutate(
+    #conf_loc = ifelse(is.na(conf_loc), " ", conf_loc),
+    entry = paste0("", authors, " ", title,"."),
+    ) %>%
+  arrange(order)
+
+cat(unlist(working_papers$entry), sep = "\\\n")
+
+```
+
+**Reports**
+
+```{r, results = "asis"}
+reports <- import_data[["pubs.xlsx"]] %>%
+  filter(type %in% c("report")) %>%
+  mutate(
+    conf_loc = ifelse(is.na(conf_loc), " ", conf_loc),
+    entry = paste0("", authors, " (", year,"). ", title,". ", conference,". ", conf_loc,"."),
+    entry = ifelse(type == "report", gsub(" \\.","", entry), entry), # fixing double . in technical report since there is no conf_loc.
+    month = gsub("(.*)(,.*)", "\\1", year)
+    ) %>%
+  arrange(order)
+
+# presentations %>%
+#   brief_entries(
+#     what = entry,
+#     when = parse_number(year),
+#     with = ""
+#     )
+
+cat(unlist(reports$entry), sep = "\\\n")
+```
+
+**Conference Presentations**
+
+```{r, results = "asis"}
+presentations <- import_data[["pubs.xlsx"]] %>%
+  filter(type %in% c("conference", "presentation")) %>%
+  mutate(
+    conf_loc = ifelse(is.na(conf_loc), " ", conf_loc),
+    entry = paste0("", authors, " (", year,"). ", title,". ", conference,". ", conf_loc,"."),
+    entry = ifelse(type == "report", gsub(" \\.","", entry), entry), # fixing double . in technical report since there is no conf_loc.
+    month = gsub("(.*)(,.*)", "\\1", year)
+    ) %>%
+  rowwise() %>%
+  mutate(
+    month = which(month.name == month)
+    ) %>%
+  ungroup() %>%
+  arrange(desc(parse_number(year)), desc(month))
+
+# presentations %>%
+#   brief_entries(
+#     what = entry,
+#     when = parse_number(year),
+#     with = ""
+#     )
+
+cat(unlist(presentations$entry), sep = "\\\n")
+```
+
+\normalsize 
+
+\pagebreak
 
 # Awards
 
@@ -135,35 +234,6 @@ import_data[["cv_entries.xlsx"]] %>%
     with = amount
     )
 ```
-
-# Presentations and Products
-
-```{r, results = "asis"}
-presentations <- import_data[["pubs.xlsx"]] %>%
-  filter(type %in% c("conference", "presentation", "report")) %>%
-  mutate(
-    conf_loc = ifelse(is.na(conf_loc), " ", conf_loc),
-    entry = paste0("", authors, " (", year,"). ", title,". ", conference,". ", conf_loc,"."),
-    entry = ifelse(type == "report", gsub(" \\.","", entry), entry), # fixing double . in technical report since there is no conf_loc.
-    month = gsub("(.*)(,.*)", "\\1", year)
-    ) %>%
-  rowwise() %>%
-  mutate(
-    month = which(month.name == month)
-    ) %>%
-  ungroup() %>%
-  arrange(desc(parse_number(year)), desc(month))
-
-presentations %>%
-  brief_entries(
-    what = entry,
-    when = parse_number(year),
-    with = ""
-    )
-
-#cat(unlist(presentations$entry), sep = "\\\n")
-```
-
 
 # Training
 
@@ -186,7 +256,6 @@ import_data[["training.xlsx"]] %>%
     #why = objective
   )
 ```
-
 
 <!-- # Grants -->
 
@@ -213,6 +282,7 @@ import_data[["training.xlsx"]] %>%
 <!--   #   when = str_to_title(type) -->
 <!--   # ) -->
 <!-- ``` -->
+
 
 # Competencies
 
@@ -242,7 +312,23 @@ import_data[["skills.xlsx"]] %>%
 <!-- cat(unlist(ref$description), sep = "\\\\") -->
 <!-- ``` -->
 
+<!-- # References -->
+
+<!-- \begin{center} -->
+<!-- \small -->
+<!-- \begin{tabular}{p{2.2in} p{2.2in} p{2.2in}} -->
+<!-- \textbf{Dr. David Liebowitz} & \textbf{Dr. Glen Waddell} & \textbf{Dr. Gina Biancarosa}\\ -->
+<!-- Assistant Professor & Professor & Professor and Ann Swindles Chair\\ -->
+<!-- Education Studies & Economics  & Special Education and Clinical Services \\ -->
+<!-- College of Education & College of Arts and Science & College of Education\\ -->
+<!-- University of Oregon & University of Oregon & University of Oregon \\ -->
+<!-- daviddl@uoregon.edu & waddell@uoregon.edu  & ginab@uoregon.edu \\ -->
+<!-- \end{tabular} -->
+<!-- \end{center} -->
+
+
 # Credits
 
+\small
 This CV was made in R using the `vitae` package. 
 
